@@ -194,4 +194,32 @@ if __name__ == "__main__":
         trainer = ModelTrainer(model_for_training, num_epochs=1)
         trainer.train()
 
-    train_mae()
+    def train_mae_with_mimic():
+        from final_project.datasets.mimic_dataset import load_mimic_dataset
+        train_ratio = 0.8
+
+        dataset = load_mimic_dataset()
+
+        train_size = int(train_ratio * len(dataset))
+
+        # Split the dataset into training and validation sets
+        train_dataset, val_dataset = torch.utils.data.random_split(
+            dataset, [train_size, len(dataset) - train_size]
+        )
+        # todo: does dataset has dataset.classes?
+        model = MAE(possible_labels=dataset.classes)
+
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
+
+        model_for_training = ConfigModelForTraining(
+            model=model,
+            criterion=criterion,
+            optimizer=optimizer,
+            scheduler=None,
+            train_dataset=train_dataset,
+            val_dataset=val_dataset,
+        )
+
+        trainer = ModelTrainer(model_for_training, num_epochs=1)
+        trainer.train()

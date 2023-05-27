@@ -5,4 +5,3 @@ from dataclasses import dataclass
 class MimicImage:
     id: str
     label: int
-
