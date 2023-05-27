@@ -1,3 +1,6 @@
+# add data folders
+assets/data/*
+
 # Pycharm project configuration
 .idea
 
