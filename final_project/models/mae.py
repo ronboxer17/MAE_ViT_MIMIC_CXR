@@ -1,4 +1,5 @@
 import requests
+import torch
 from PIL import Image
 from torch import nn
 from transformers import (
@@ -10,8 +11,8 @@ import PIL
 
 from torchvision import datasets, transforms
 
-from timm.data import create_transform
-from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+# from timm.data import create_transform
+# from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from final_project.datasets.datamodels import MimicImage
 # from final_project.datasets.mimic import MimicDataset
 import pandas as pd
@@ -60,7 +61,11 @@ class MAE(nn.Module):
     # Todo: change to relevant model
     model_name = "facebook/vit-mae-base"
 
-    def __init__(self, possible_labels: list[str], *args, **kwargs):
+    def __init__(self,
+                 possible_labels: List[str] = ['0', '1'],
+                 *args,
+                 **kwargs
+                 ):
         self.possible_labels = possible_labels
         super().__init__(*args, **kwargs)
         self.mae = ViTMAEForPreTraining.from_pretrained(self.model_name)
@@ -68,22 +73,21 @@ class MAE(nn.Module):
             nn.Linear(self.mae.config.hidden_size, len(possible_labels)),
         )
 
-    def forward(self, inputs):
+    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
         outputs = self.mae.forward(inputs)
         return self.classifier(
             outputs.logits[:, 0, :]  # reshape to (batch_size, hidden_size)
         )
 
 
-
-def build_transform(is_train=True):
+def build_transform(is_train=True, input_size=224):
     mean = IMAGENET_DEFAULT_MEAN
     std = IMAGENET_DEFAULT_STD
     # train transform
     if is_train:
         # this should always dispatch to transforms_imagenet_train
         transform = create_transform(
-            input_size=224,
+            input_size=input_size,
             is_training=True,
             color_jitter=None,
             auto_augment='rand-m9-mstd0.5-inc1',
@@ -98,16 +102,16 @@ def build_transform(is_train=True):
 
     # eval transform
     t = []
-    # if args.input_size <= 224:
-    #     crop_pct = 224 / 256
-    # else:
-    #     crop_pct = 1.0
-    crop_pct = 1.0
-    size = int(224 / crop_pct)
+    if input_size <= 224:
+        crop_pct = 224 / 256
+    else:
+        crop_pct = 1.0
+
+    size = int(input_size / crop_pct)
     t.append(
         transforms.Resize(size, interpolation=PIL.Image.BICUBIC),  # to maintain same ratio w.r.t. 224 images
     )
-    t.append(transforms.CenterCrop(224))
+    t.append(transforms.CenterCrop(input_size))
 
     t.append(transforms.ToTensor())
     t.append(transforms.Normalize(mean, std))
