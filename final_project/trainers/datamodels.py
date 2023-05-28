@@ -5,7 +5,7 @@ from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
                              precision_score, recall_score)
 
 
-class ConfigModelForTraining(BaseModel):
+class TrainingConfig(BaseModel):
     model: Any
     criterion: Any
     optimizer: Any
