@@ -1,5 +1,7 @@
 # add data folders
 assets/data/parking/*
+assets/data/logs/*
+assets/data/models/*
 
 # Pycharm project configuration
 .idea
