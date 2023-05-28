@@ -3,11 +3,16 @@ from pathlib import Path
 
 ROOT_PATH = Path(__file__).resolve().parent
 DATA_PATH = os.path.join(ROOT_PATH, "assets/data")
+LOGS_PATH = os.path.join(ROOT_PATH, "assets/logs")
+MODELS_PATH = os.path.join(ROOT_PATH, "assets/models")
 MIMIC_PATH = os.path.join(DATA_PATH, "mimic-cxr")
+
 METADATA_PATH = os.path.join(MIMIC_PATH, "mimic-cxr/mimic-cxr-2.0.0-metadata.csv")
 SPLIT_PATH = os.path.join(MIMIC_PATH, "mimic-cxr/mimic-cxr-2.0.0-split.csv")
 CHEXPERT_PATH = os.path.join(MIMIC_PATH, "mimic-cxr/mimic-cxr-2.0.0-chexpert.csv")
 NEGIBOX_PATH = os.path.join(MIMIC_PATH, "mimic-cxr/mimic-cxr-2.0.0-negbio.csv")
+
+
 
 
 IMG_PATH = os.path.join(r"D:/MIMIC CXR/physionet.org/files/mimic-cxr-jpg/2.0.0/files")

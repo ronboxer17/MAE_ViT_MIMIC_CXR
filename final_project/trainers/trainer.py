@@ -1,36 +1,39 @@
-from typing import Optional
-
+from typing import Optional, Tuple, Any
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from torchvision import datasets
-
-from final_project.datamodels import ConfigModelForTraining, EpochResult
+import logging
+import datetime
+from final_project.trainers.datamodels import TrainingConfig, EpochResult
+from final_project.config import LOGS_PATH, MODELS_PATH
 from tqdm import tqdm
-
-from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 
 
 class ModelTrainer:
     def __init__(
             self,
-            model_for_training: ConfigModelForTraining,
-            train_ratio: float = 0.8,
+            _config: TrainingConfig,
             batch_size: int = 16,
             num_epochs: int = 10,
-            device: str = "cuda",
+            device: str = "cpu",
+            save_model: bool = False,
     ):
-        # unpack the model_for_training
-        self.model = model_for_training.model
-        self.criterion = model_for_training.criterion
-        self.optimizer = model_for_training.optimizer
-        self.scheduler = model_for_training.scheduler
+        # unpack the _config
+        self.model = _config.model
+        self.criterion = _config.criterion
+        self.optimizer = _config.optimizer
+        self.scheduler = _config.scheduler
         self.num_classes = self.model.possible_labels
 
-        self.train_ratio = train_ratio
         self.num_epochs = num_epochs
         self.batch_size = batch_size
+        self.save_model = save_model
+
+        self.output_file_name = self._create_output_file_name()
+        self.logger, self.file_handler = self.init_logger()
 
         if device == "cuda" and not torch.cuda.is_available():
             raise ValueError("CUDA is not available")
@@ -38,10 +41,10 @@ class ModelTrainer:
         self.model.to(self.device)
 
         self.train_dataloader = self.create_dataloaders(
-            model_for_training.train_dataset, shuffle=True
+            _config.train_dataset, shuffle=True
         )
-        self.val_dataloader = self.create_dataloaders(model_for_training.val_dataset)
-        self.test_dataloader = self.create_dataloaders(model_for_training.test_dataset)
+        self.val_dataloader = self.create_dataloaders(_config.val_dataset)
+        self.test_dataloader = self.create_dataloaders(_config.test_dataset)
 
     def create_dataloaders(
             self, data: datasets.ImageFolder, shuffle: bool = False
@@ -54,26 +57,42 @@ class ModelTrainer:
     def train(self):
         self.model.train()
 
-        print(f"Start Training on: {self.device}")
-        for epoch in range(self.num_epochs):
-            print(f"Epoch {epoch + 1}/{self.num_epochs}")
-            running_loss = 0
-            # TODO: Add tqdm here
+        self.logger.info(
+            f"Start Training model {self.model.model_name} on {self.device},"
+            f"{self.num_epochs} epochs, {self.batch_size} batch size"
+        )
 
-            # Training loop
-            for i, (inputs, labels) in tqdm(enumerate(self.train_dataloader)):
-                print(f'Starting training on batch #: {i}')
-                batch_loss = self.train_batch(inputs, labels)
+        with tqdm(total=self.num_epochs * self.batch_size, desc='Training Progress', position=0) as pbar:
+            for nun_epoch in range(self.num_epochs):
+                pbar.set_description(f"Epoch {nun_epoch + 1}/{self.num_epochs}")
 
-                running_loss += batch_loss
+                running_loss = 0
 
-            epoch_loss = running_loss / len(self.train_dataloader)
-            print(
-                f"Epoch {epoch + 1}/{self.num_epochs} - Training Loss: {epoch_loss:.4f}"
-            )
+                # Training loop
+                for num_batch, (inputs, labels) in enumerate(self.train_dataloader):
+                    batch_loss = self.train_batch(inputs, labels)
 
-            # Validation loop
-            self.validate_epoch(epoch + 1, self.num_epochs)
+                    pbar.set_description(
+                        f"Epoch: {nun_epoch} Batch {num_batch + 1}/{len(self.train_dataloader)}. batch_loss {batch_loss:.4f}"
+                    )
+
+                    running_loss += batch_loss
+
+                    epoch_loss = running_loss / len(self.train_dataloader)
+                    self.logger.info(
+                        f"Epoch {nun_epoch + 1}/{self.num_epochs} - Batch {num_batch} Training Loss: {epoch_loss:.4f}"
+                    )
+                    pbar.update(1)
+
+                self.logger.info(f'Finished Training Epoch {nun_epoch + 1}')
+                # Validation loop
+                self.validate_epoch(nun_epoch + 1, self.num_epochs)
+
+                if self.save_model:
+                    self.save_model_to_path()
+
+        self.logger.removeHandler(self.file_handler)
+        self.file_handler.close()
 
     def train_batch(self, inputs, labels) -> float:
         inputs = inputs.to(self.device)
@@ -92,16 +111,17 @@ class ModelTrainer:
         loss.backward()
         self.optimizer.step()
 
-        print(f"Batch Loss: {loss.item():.4f}")
+        # print(f"Batch Loss: {loss.item():.4f}")
         return loss.item()
 
     def validate_epoch(self, current_epoch, total_epochs) -> EpochResult:
-        print('Starting Evaluation... ')
+        self.logger.info(f"Epoch {current_epoch}/{total_epochs} - Validating")
         self.model.eval()
 
         all_losses, all_labels, all_predictions = [], [], []
 
         with torch.no_grad():
+                                           # TODO: make the function work with val dataloader and train dataloader and test dataloader
             for epoch, (inputs, labels) in tqdm(enumerate(self.val_dataloader)):
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
@@ -121,123 +141,43 @@ class ModelTrainer:
             labels=all_labels,
             predictions=all_predictions,
         )
-        print(
-            f"Epoch {current_epoch}/{total_epochs} - Last loss: {epoch_result.losses[-1]:.4f}",
-            f"Epoch accuracy: {epoch_result.accuracy:.4f}",
-            f"Epoch precision: {epoch_result.precision:.4f}",
-            f"Epoch recall: {epoch_result.recall:.4f}",
-            f"Epoch f1: {epoch_result.f1:.4f}",
+        self.logger.info(
+            f"Epoch {current_epoch}/{total_epochs} - Last loss: {epoch_result.losses[-1]:.4f}"
+            f"Epoch accuracy: {epoch_result.accuracy:.4f}"
+            f"Epoch precision: {epoch_result.precision:.4f}"
+            f"Epoch recall: {epoch_result.recall:.4f}"
+            f"Epoch f1: {epoch_result.f1:.4f}"
         )
         return epoch_result
 
-    def save_model(self, file_path):
-        torch.save(self.model.state_dict(), file_path)
+    def save_model_to_path(self, file_name: Optional[str] = None):
+        if not file_name:
+            file_name = self.output_file_name
 
+        model_path = os.path.join(MODELS_PATH, f"{file_name}.pth")
+        torch.save(self.model.state_dict(), model_path)
+        self.logger.info(f"Model saved to {model_path}")
 
-if __name__ == "__main__":
-    from final_project.datamodels import ConfigModelForTraining
-    from final_project.datasets.parking_dataset import load_parking_dataset
-    from final_project.models.mae import MAE
-    from final_project.models.resnet import ResNet
+    def init_logger(self) -> Tuple[Any, Any]:
+        logger = logging.getLogger("trainer")
+        logger.setLevel(logging.INFO)
 
-
-    # TRAIN RESNET
-    def train_resnet():
-        train_ratio = 0.8
-
-        dataset = load_parking_dataset()
-        train_size = int(train_ratio * len(dataset))
-
-        # Split the dataset into training and validation sets
-        train_dataset, val_dataset = torch.utils.data.random_split(
-            dataset, [train_size, len(dataset) - train_size]
+        file_handler = logging.FileHandler(
+            os.path.join(LOGS_PATH, f"{self.output_file_name}.log")
         )
-        model = ResNet(possible_labels=dataset.classes)
+        file_handler.setLevel(logging.INFO)
 
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
-
-        model_for_training = ConfigModelForTraining(
-            model=model,
-            criterion=criterion,
-            optimizer=optimizer,
-            scheduler=None,
-            train_dataset=train_dataset,
-            val_dataset=val_dataset,
+        # Create a formatter and add it to the file handler
+        file_handler.setFormatter(
+            logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         )
 
-        trainer = ModelTrainer(model_for_training, num_epochs=1)
-        trainer.train()
+        # Add the file handler to the logger
+        logger.addHandler(file_handler)
 
+        return logger, file_handler
 
-    def train_mae():
-        train_ratio = 0.8
-        # feature_extractor = AutoFeatureExtractor.from_pretrained('facebook/vit-mae-base')
-        # transformer = lambda x: feature_extractor(images=x, return_tensors="pt")
-        # dataset = load_parking_dataset()
-        dataset_train = build_dataset(is_train=True)
-        dataset_val = build_dataset(is_train=False)
-
-        train_size = int(train_ratio * len(dataset))
-
-        # Split the dataset into training and validation sets
-        train_dataset, val_dataset = torch.utils.data.random_split(
-            dataset, [train_size, len(dataset) - train_size]
-        )
-        model = MAE(possible_labels=dataset.classes)
-
-        criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
-
-        model_for_training = ConfigModelForTraining(
-            model=model,
-            criterion=criterion,
-            optimizer=optimizer,
-            scheduler=None,
-            train_dataset=train_dataset,
-            val_dataset=val_dataset,
-        )
-
-        trainer = ModelTrainer(model_for_training, num_epochs=1)
-        trainer.train()
-
-
-    def train_mae_with_mimic():
-        from final_project.datasets.mimic import build_dataset
-        train_ratio = 0.8
-        # Todo : Add Val
-        # dataset = build_dataset()
-
-        train_dataset = build_dataset(is_train=True)
-        val_dataset = build_dataset(is_train=False)
-        # train_size = int(train_ratio * len(dataset))
-        print(f'The Traning size is: {len(train_dataset)}')
-        print(f'The Val size is: {len(val_dataset)}')
-
-        # # Split the dataset into training and validation sets
-        # train_dataset, val_dataset = torch.utils.data.random_split(
-        #     dataset, [train_size, len(dataset) - train_size]
-        # )
-        model = MAE(possible_labels=['0', '1'])
-
-        criterion = nn.CrossEntropyLoss()
-        # optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
-        optimizer = torch.optim.AdamW(model.parameters(), lr=1e-6)
-        model_for_training = ConfigModelForTraining(
-            model=model,
-            criterion=criterion,
-            optimizer=optimizer,
-            scheduler=None,
-            train_dataset=train_dataset,
-            val_dataset=val_dataset,
-        )
-
-        trainer = ModelTrainer(model_for_training, num_epochs=5, batch_size=64)
-        trainer.train()
-
-
-    train_mae_with_mimic()
-
-    # Started 5 epochs 18:55
-
-    train_resnet()
+    def _create_output_file_name(self):
+        """create a unique file name for the model without extension and path"""
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        return f"{self.model.model_name.replace('/', '-')}_{timestamp}"
