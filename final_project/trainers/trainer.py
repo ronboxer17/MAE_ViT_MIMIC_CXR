@@ -223,3 +223,5 @@ if __name__ == "__main__":
 
         trainer = ModelTrainer(model_for_training, num_epochs=1)
         trainer.train()
+
+    train_resnet()
