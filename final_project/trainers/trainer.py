@@ -7,16 +7,19 @@ from torch.utils.data import DataLoader
 from torchvision import datasets
 
 from final_project.datamodels import ConfigModelForTraining, EpochResult
+from tqdm import tqdm
+
+from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 
 
 class ModelTrainer:
     def __init__(
-        self,
-        model_for_training: ConfigModelForTraining,
-        train_ratio: float = 0.8,
-        batch_size: int = 16,
-        num_epochs: int = 10,
-        device: str = "cpu",
+            self,
+            model_for_training: ConfigModelForTraining,
+            train_ratio: float = 0.8,
+            batch_size: int = 16,
+            num_epochs: int = 10,
+            device: str = "cuda",
     ):
         # unpack the model_for_training
         self.model = model_for_training.model
@@ -41,7 +44,7 @@ class ModelTrainer:
         self.test_dataloader = self.create_dataloaders(model_for_training.test_dataset)
 
     def create_dataloaders(
-        self, data: datasets.ImageFolder, shuffle: bool = False
+            self, data: datasets.ImageFolder, shuffle: bool = False
     ) -> Optional[DataLoader]:
         # Load the dataset using ImageFolder
         if not data:
@@ -51,17 +54,15 @@ class ModelTrainer:
     def train(self):
         self.model.train()
 
-        print(f"Start Training on {self.device}")
+        print(f"Start Training on: {self.device}")
         for epoch in range(self.num_epochs):
             print(f"Epoch {epoch + 1}/{self.num_epochs}")
             running_loss = 0
             # TODO: Add tqdm here
 
             # Training loop
-            for i, (inputs, labels) in enumerate(self.train_dataloader):
-                if i > 1:
-                    continue
-
+            for i, (inputs, labels) in tqdm(enumerate(self.train_dataloader)):
+                print(f'Starting training on batch #: {i}')
                 batch_loss = self.train_batch(inputs, labels)
 
                 running_loss += batch_loss
@@ -95,12 +96,13 @@ class ModelTrainer:
         return loss.item()
 
     def validate_epoch(self, current_epoch, total_epochs) -> EpochResult:
+        print('Starting Evaluation... ')
         self.model.eval()
 
         all_losses, all_labels, all_predictions = [], [], []
 
         with torch.no_grad():
-            for epoch, (inputs, labels) in enumerate(self.val_dataloader):
+            for epoch, (inputs, labels) in tqdm(enumerate(self.val_dataloader)):
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
                 outputs = self.model(inputs)
@@ -138,6 +140,7 @@ if __name__ == "__main__":
     from final_project.models.mae import MAE
     from final_project.models.resnet import ResNet
 
+
     # TRAIN RESNET
     def train_resnet():
         train_ratio = 0.8
@@ -166,11 +169,15 @@ if __name__ == "__main__":
         trainer = ModelTrainer(model_for_training, num_epochs=1)
         trainer.train()
 
+
     def train_mae():
         train_ratio = 0.8
         # feature_extractor = AutoFeatureExtractor.from_pretrained('facebook/vit-mae-base')
         # transformer = lambda x: feature_extractor(images=x, return_tensors="pt")
-        dataset = load_parking_dataset()
+        # dataset = load_parking_dataset()
+        dataset_train = build_dataset(is_train=True)
+        dataset_val = build_dataset(is_train=False)
+
         train_size = int(train_ratio * len(dataset))
 
         # Split the dataset into training and validation sets
@@ -193,25 +200,29 @@ if __name__ == "__main__":
 
         trainer = ModelTrainer(model_for_training, num_epochs=1)
         trainer.train()
+
 
     def train_mae_with_mimic():
-        from final_project.datasets.mimic_dataset import load_mimic_dataset
+        from final_project.datasets.mimic import build_dataset
         train_ratio = 0.8
+        # Todo : Add Val
+        # dataset = build_dataset()
 
-        dataset = load_mimic_dataset()
+        train_dataset = build_dataset(is_train=True)
+        val_dataset = build_dataset(is_train=False)
+        # train_size = int(train_ratio * len(dataset))
+        print(f'The Traning size is: {len(train_dataset)}')
+        print(f'The Val size is: {len(val_dataset)}')
 
-        train_size = int(train_ratio * len(dataset))
-
-        # Split the dataset into training and validation sets
-        train_dataset, val_dataset = torch.utils.data.random_split(
-            dataset, [train_size, len(dataset) - train_size]
-        )
-        # todo: does dataset has dataset.classes?
-        model = MAE(possible_labels=dataset.classes)
+        # # Split the dataset into training and validation sets
+        # train_dataset, val_dataset = torch.utils.data.random_split(
+        #     dataset, [train_size, len(dataset) - train_size]
+        # )
+        model = MAE(possible_labels=['0', '1'])
 
         criterion = nn.CrossEntropyLoss()
-        optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
-
+        # optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
+        optimizer = torch.optim.AdamW(model.parameters(), lr=1e-6)
         model_for_training = ConfigModelForTraining(
             model=model,
             criterion=criterion,
@@ -221,7 +232,12 @@ if __name__ == "__main__":
             val_dataset=val_dataset,
         )
 
-        trainer = ModelTrainer(model_for_training, num_epochs=1)
+        trainer = ModelTrainer(model_for_training, num_epochs=5, batch_size=64)
         trainer.train()
+
+
+    train_mae_with_mimic()
+
+    # Started 5 epochs 18:55
 
     train_resnet()
