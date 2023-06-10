@@ -69,32 +69,31 @@ class ModelTrainer:
             position=0,
         ) as pbar:
             for nun_epoch in range(self.num_epochs):
-                pbar.set_description(f"Epoch {nun_epoch + 1}/{self.num_epochs}")
-
                 running_loss = 0
 
                 # Training loop
                 for num_batch, batch in enumerate(self.train_dataloader):
+                    if num_batch > 2:
+                        break
                     batch_loss = self.train_batch(*batch)
+                    pbar.set_description(
+                        f" Epoch {nun_epoch + 1}/{self.num_epochs}"
+                        f" Batch {num_batch + 1}/{len(self.train_dataloader)}"
+                        f" Batch_loss {batch_loss:.4f}. Best Loss so far {best_loss:.4f}"
+                    )
                     if batch_loss < best_loss:
                         best_loss = batch_loss
-                        pbar.set_description(
-                            f"Epoch: {nun_epoch} Batch {num_batch + 1}/{len(self.train_dataloader)}."
-                            f" batch_loss {batch_loss:.4f}. Best Loss so far {best_loss:.4f}"
-                        )
-
                     running_loss += batch_loss
-
-                    epoch_loss = running_loss / len(self.train_dataloader)
-                    self.logger.info(
-                        f"Epoch {nun_epoch + 1}/{self.num_epochs} - Batch {num_batch} Training Loss: {epoch_loss:.4f}"
-                    )
                     pbar.update(1)
 
+                epoch_loss = running_loss / len(self.train_dataloader)
+                self.logger.info(
+                    f"Epoch {nun_epoch + 1}/{self.num_epochs} - Batch {num_batch} Training Loss: {epoch_loss:.4f}"
+                )
                 self.logger.info(f"Finished Training Epoch {nun_epoch + 1}")
                 # Validation loop
                 self.logger.info(
-                    f"Epoch {nun_epoch + 1,}/{self.num_epochs} - Validating"
+                    f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating"
                 )
                 self.validate_epoch(self.val_dataloader, dataset_type="val")
 
@@ -220,8 +219,8 @@ class ModelTrainer:
             logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         )
 
-        # Add the file handler to the logger
         logger.addHandler(file_handler)
+        logger.addHandler(logging.StreamHandler())
 
         return logger, file_handler
 

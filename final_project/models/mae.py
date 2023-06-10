@@ -16,12 +16,13 @@ class MAE(nn.Module):
 
     def __init__(self, possible_labels: List[str] = ["0", "1"], *args, **kwargs):
         self.possible_labels = possible_labels
+
         super().__init__(*args, **kwargs)
+
         self.mae = ViTMAEForPreTraining.from_pretrained(self.model_name)
         self.classifier = nn.Sequential(
             nn.Linear(self.mae.config.hidden_size, len(possible_labels)),
         )
-        super().__init__(*args, **kwargs)
 
     def forward(self, inputs: torch.Tensor, *args) -> torch.Tensor:
         outputs = self.mae.forward(inputs)

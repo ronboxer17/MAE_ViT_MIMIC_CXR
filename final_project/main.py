@@ -13,7 +13,7 @@ from final_project.trainers.trainer import ModelTrainer
 # define parameters
 lr = 1e-6
 num_epochs = 1
-batch_size = 32
+batch_size = 128
 device = "cuda"
 
 
@@ -22,7 +22,8 @@ val_dataset = build_mimic_dataset(is_train=False)
 
 
 # model = MAE(possible_labels=['0', '1'])
-model = MAE()
+# model = MAE()
+model = ResNet()
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
