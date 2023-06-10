@@ -24,4 +24,4 @@ IDS_WITH_LABELS_AND_SPLITS = os.path.join(
     MIMIC_PATH, r"meta-data/dicoms_with_labels_and_splits.csv"
 )
 
-DATASET_TYPES = ['train', 'val', 'test']
+DATASET_TYPES = ["train", "val", "test"]

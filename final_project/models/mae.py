@@ -1,40 +1,27 @@
+from typing import List
+import PIL
 import requests
 import torch
 from PIL import Image
-from torch import nn
-from transformers import (
-    AutoFeatureExtractor,
-    ViTMAEForPreTraining,
-)
-import os
-import PIL
-
-from torchvision import datasets, transforms
-
 from timm.data import create_transform
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
-from final_project.datasets.datamodels import MimicImage
-# from final_project.datasets.mimic import MimicDataset
-import pandas as pd
-from final_project.config import MIMIC_FILES_PATH, IDS_TO_IMAGES_PATHS, IDS_WITH_LABELS_AND_SPLITS
-from typing import List, Tuple, Optional
-import json
+from torch import nn
+from torchvision import transforms
+from transformers import AutoFeatureExtractor, ViTMAEForPreTraining
+
 
 class MAE(nn.Module):
     # Todo: change to relevant model
     model_name = "facebook/vit-mae-base"
 
-    def __init__(self,
-                 possible_labels: List[str] = ['0', '1'],
-                 *args,
-                 **kwargs
-                 ):
+    def __init__(self, possible_labels: List[str] = ["0", "1"], *args, **kwargs):
         self.possible_labels = possible_labels
         super().__init__(*args, **kwargs)
         self.mae = ViTMAEForPreTraining.from_pretrained(self.model_name)
         self.classifier = nn.Sequential(
             nn.Linear(self.mae.config.hidden_size, len(possible_labels)),
         )
+        super().__init__(*args, **kwargs)
 
     def forward(self, inputs: torch.Tensor, *args) -> torch.Tensor:
         outputs = self.mae.forward(inputs)
@@ -53,10 +40,10 @@ def build_transform(is_train=True, input_size=224):
             input_size=input_size,
             is_training=True,
             color_jitter=None,
-            auto_augment='rand-m9-mstd0.5-inc1',
-            interpolation='bicubic',
+            auto_augment="rand-m9-mstd0.5-inc1",
+            interpolation="bicubic",
             re_prob=0.25,
-            re_mode='pixel',
+            re_mode="pixel",
             re_count=1,
             mean=mean,
             std=std,
@@ -72,7 +59,9 @@ def build_transform(is_train=True, input_size=224):
 
     size = int(input_size / crop_pct)
     t.append(
-        transforms.Resize(size, interpolation=PIL.Image.BICUBIC),  # to maintain same ratio w.r.t. 224 images
+        transforms.Resize(
+            size, interpolation=PIL.Image.BICUBIC
+        ),  # to maintain same ratio w.r.t. 224 images
     )
     t.append(transforms.CenterCrop(input_size))
 
@@ -80,8 +69,6 @@ def build_transform(is_train=True, input_size=224):
     t.append(transforms.Normalize(mean, std))
     return transforms.Compose(t)
 
-
-# s = create_train_val_test('train')
 
 if __name__ == "__main__":
     mae = MAE(possible_labels=["cat", "dog"])

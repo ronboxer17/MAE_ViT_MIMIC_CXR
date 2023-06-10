@@ -1,7 +1,9 @@
 import os.path
 from typing import Tuple
-from torchvision import datasets, transforms
+
 from torch.utils.data import random_split
+from torchvision import datasets, transforms
+
 from final_project.config import DATA_PATH
 
 DATA_DIR = "parking/data"
@@ -16,12 +18,14 @@ transformer = transforms.Compose(
 
 
 def load_parking_dataset(
-        root: str = data_root_path, transform=transformer
+    root: str = data_root_path, transform=transformer
 ) -> datasets.ImageFolder:
     return datasets.ImageFolder(root=root, transform=transform)
 
 
-def train_test_mock_data(train_ratio=0.8) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:
+def train_test_mock_data(
+    train_ratio=0.8,
+) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:
     dataset = load_parking_dataset()
     train_size = int(train_ratio * len(dataset))
     train_dataset, val_dataset = random_split(

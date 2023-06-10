@@ -1,28 +1,26 @@
-from typing import Optional, Tuple, Any
-import os
+import datetime
 import json
+import logging
+import os
+from typing import Any, Optional, Tuple
+
 import numpy as np
 import torch
-import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
-from torchvision import datasets
-import logging
-import datetime
-from final_project.trainers.datamodels import TrainingConfig, EpochResult
-from final_project.config import LOGS_PATH, MODELS_PATH, METRICS_PATH, DATASET_TYPES
 from tqdm import tqdm
 
+from final_project.config import DATASET_TYPES, LOGS_PATH, METRICS_PATH, MODELS_PATH
+from final_project.trainers.datamodels import EpochResult, TrainingConfig
 
 
 class ModelTrainer:
     def __init__(
-            self,
-            _config: TrainingConfig,
-            batch_size: int = 16,
-            num_epochs: int = 10,
-            device: str = "cpu",
-            save_model: bool = False,
+        self,
+        _config: TrainingConfig,
+        batch_size: int = 16,
+        num_epochs: int = 10,
+        device: str = "cpu",
+        save_model: bool = False,
     ):
         # unpack the _config
         self.model = _config.model
@@ -50,7 +48,7 @@ class ModelTrainer:
         self.test_dataloader = self.create_dataloaders(_config.test_dataset)
 
     def create_dataloaders(
-            self, data: Dataset, shuffle: bool = False
+        self, data: Dataset, shuffle: bool = False
     ) -> Optional[DataLoader]:
         # Load the dataset using ImageFolder
         if not data:
@@ -65,7 +63,11 @@ class ModelTrainer:
             f"{self.num_epochs} epochs, {self.batch_size} batch size"
         )
         best_loss = np.Inf
-        with tqdm(total=self.num_epochs * self.batch_size, desc='Training Progress', position=0) as pbar:
+        with tqdm(
+            total=self.num_epochs * self.batch_size,
+            desc="Training Progress",
+            position=0,
+        ) as pbar:
             for nun_epoch in range(self.num_epochs):
                 pbar.set_description(f"Epoch {nun_epoch + 1}/{self.num_epochs}")
 
@@ -89,10 +91,12 @@ class ModelTrainer:
                     )
                     pbar.update(1)
 
-                self.logger.info(f'Finished Training Epoch {nun_epoch + 1}')
+                self.logger.info(f"Finished Training Epoch {nun_epoch + 1}")
                 # Validation loop
-                self.logger.info(f"Epoch {nun_epoch + 1,}/{self.num_epochs} - Validating")
-                self.validate_epoch(self.val_dataloader, dataset_type='val')
+                self.logger.info(
+                    f"Epoch {nun_epoch + 1,}/{self.num_epochs} - Validating"
+                )
+                self.validate_epoch(self.val_dataloader, dataset_type="val")
 
                 if self.save_model:
                     self.save_model_to_path()
@@ -117,21 +121,26 @@ class ModelTrainer:
         loss.backward()
         self.optimizer.step()
 
-        # print(f"Batch Loss: {loss.item():.4f}")
         return loss.item()
 
     def validate_epoch(self, data_loader: DataLoader, dataset_type: str) -> EpochResult:
-        assert dataset_type in DATASET_TYPES, f'{dataset_type} Not in {DATASET_TYPES}'
+        assert dataset_type in DATASET_TYPES, f"{dataset_type} Not in {DATASET_TYPES}"
 
-        self.logger.info(f'Starting Evaluating')
+        self.logger.info(f"Starting Evaluating")
         self.model.eval()
+
         all_losses, all_labels, all_predictions, all_ids, all_probabilities = [], [], [], [], []
         with torch.no_grad():
-            with tqdm(total=len(data_loader), desc=f'Evaluation Progress on- {dataset_type}', position=0) as pbar:
+            with tqdm(
+                total=len(data_loader),
+                desc=f"Evaluation Progress on- {dataset_type}",
+                position=0,
+            ) as pbar:
                 for epoch, batch in enumerate(data_loader):
                     inputs = batch[0].to(self.device)
                     labels = batch[1].to(self.device)
                     ids = batch[2]
+
                     outputs = self.model(inputs)
                     loss = self.criterion(
                         outputs, labels
@@ -173,20 +182,27 @@ class ModelTrainer:
         torch.save(self.model.state_dict(), model_path)
         self.logger.info(f"Model saved to {model_path}")
 
-    def save_eval_results(self, epoch_result: EpochResult, dataset_type: str, file_name: Optional[str] = None) -> None:
+    def save_eval_results(
+        self,
+        epoch_result: EpochResult,
+        dataset_type: str,
+        file_name: Optional[str] = None,
+    ) -> None:
         if not file_name:
             file_name = self.output_file_name
 
-        file_name = f'{file_name}_{dataset_type}'
+        file_name = f"{file_name}_{dataset_type}"
         file_path = os.path.join(METRICS_PATH, f"{file_name}.json")
         dict = epoch_result.dict()
-        dict.update({
-            'accuracy': epoch_result.accuracy,
-            'precision': epoch_result.precision,
-            'f1': epoch_result.f1,
-            'recall': epoch_result.recall,
-            'roc_auc_score': epoch_result.roc_auc_score,
-        })
+        dict.update(
+            {
+                "accuracy": epoch_result.accuracy,
+                "precision": epoch_result.precision,
+                "f1": epoch_result.f1,
+                "recall": epoch_result.recall,
+                "roc_auc_score": epoch_result.roc_auc_score,
+            }
+        )
         with open(file_path, "w") as file:
             json.dump(dict, file)
 
@@ -201,7 +217,7 @@ class ModelTrainer:
 
         # Create a formatter and add it to the file handler
         file_handler.setFormatter(
-            logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         )
 
         # Add the file handler to the logger
@@ -211,5 +227,5 @@ class ModelTrainer:
 
     def _create_output_file_name(self):
         """create a unique file name for the model without extension and path"""
-        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         return f"{self.model.model_name.replace('/', '-')}_{timestamp}"
