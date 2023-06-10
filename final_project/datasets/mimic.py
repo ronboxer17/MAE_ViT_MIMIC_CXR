@@ -58,15 +58,8 @@ def create_mimic_image_if_possible(id: str, label: str) -> Optional[MimicImage]:
 
 def build_dataset(is_train=True):
     transform = build_transform(is_train)
-
-    # root = os.path.join(args.data_path, 'train' if is_train else 'val')
-    # dataset = datasets.ImageFolder(root, transform=transform)
-    #TODO- check 'val' case
     train_ids = create_train_val_test('train' if is_train else 'val')
     dataset = MimicDataset(train_ids, transform=transform)
-
-    print(dataset)
-
     return dataset
 
 

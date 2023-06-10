@@ -61,7 +61,7 @@ class ModelTrainer:
             f"Start Training model {self.model.model_name} on {self.device},"
             f"{self.num_epochs} epochs, {self.batch_size} batch size"
         )
-
+        best_loss = 3.0
         with tqdm(total=self.num_epochs * self.batch_size, desc='Training Progress', position=0) as pbar:
             for nun_epoch in range(self.num_epochs):
                 pbar.set_description(f"Epoch {nun_epoch + 1}/{self.num_epochs}")
@@ -71,9 +71,11 @@ class ModelTrainer:
                 # Training loop
                 for num_batch, (inputs, labels) in enumerate(self.train_dataloader):
                     batch_loss = self.train_batch(inputs, labels)
-
+                    if batch_loss < best_loss:
+                        best_loss = batch_loss
                     pbar.set_description(
-                        f"Epoch: {nun_epoch} Batch {num_batch + 1}/{len(self.train_dataloader)}. batch_loss {batch_loss:.4f}"
+                        f"Epoch: {nun_epoch} Batch {num_batch + 1}/{len(self.train_dataloader)}."
+                        f" batch_loss {batch_loss:.4f}. Best Loss so far {best_loss:.4f}"
                     )
 
                     running_loss += batch_loss

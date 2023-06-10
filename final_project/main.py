@@ -6,16 +6,23 @@ from final_project.models.mae import MAE
 from final_project.models.resnet import ResNet
 import torch
 
-train_dataset, val_dataset = train_test_mock_data()
+# train_dataset, val_dataset = train_test_mock_data()
 
 
 # define parameters
 lr = 1e-6
-num_epochs = 1
+num_epochs = 3
 batch_size = 32
-device = "cpu"
+device = "cuda"
 
-model = ResNet()
+
+train_dataset = build_dataset(is_train=True)
+val_dataset = build_dataset(is_train=False)
+
+
+
+# model = MAE(possible_labels=['0', '1'])
+model = MAE()
 criterion = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
