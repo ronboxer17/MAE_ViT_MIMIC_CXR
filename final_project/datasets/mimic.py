@@ -4,7 +4,7 @@ from PIL import Image
 import os
 from final_project.datasets.datamodels import MimicImage
 import pandas as pd
-from final_project.config import MIMIC_FILES_PATH, IDS_TO_IMAGES_PATHS, IDS_WITH_LABELS_AND_SPLITS
+from final_project.config import MIMIC_FILES_PATH, IDS_TO_IMAGES_PATHS, IDS_WITH_LABELS_AND_SPLITS, DATASET_TYPES
 from typing import List, Tuple, Optional
 import json
 from final_project.models.mae import build_transform
@@ -24,7 +24,7 @@ class MimicDataset(Dataset):
     def __len__(self):
         return len(self.ids_labels)
 
-    def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
+    def __getitem__(self, idx) -> Tuple[torch.Tensor, int, str]:
         mimic_image = self.ids_labels[idx]
         id = mimic_image.id
         label = mimic_image.label
@@ -35,11 +35,11 @@ class MimicDataset(Dataset):
 
         if self.transform is not None:
             image = self.transform(image)
-        return image, label
+        return image, label, id
 
 
 def create_train_val_test(split: str, view: str = 'frontal') -> List[MimicImage]:
-    assert split in ['train', 'val', 'test']
+    assert split in DATASET_TYPES
     if split == 'val':  # Special case for MIMIC dataset.
         split = 'validate'
     df = pd.read_csv(IDS_WITH_LABELS_AND_SPLITS)
@@ -56,7 +56,7 @@ def create_mimic_image_if_possible(id: str, label: str) -> Optional[MimicImage]:
         return MimicImage(id, int(label))
 
 
-def build_dataset(is_train=True):
+def build_mimic_dataset(is_train=True):
     transform = build_transform(is_train)
     train_ids = create_train_val_test('train' if is_train else 'val')
     dataset = MimicDataset(train_ids, transform=transform)
@@ -65,8 +65,8 @@ def build_dataset(is_train=True):
 
 
 if __name__ == '__main__':
-    data = build_dataset()
-    dataloader = DataLoader(data, batch_size=1)
+    data = build_mimic_dataset()
+    dataloader = DataLoader(data, batch_size=2)
     for batch in dataloader:
         print(batch)
         print()

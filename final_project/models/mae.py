@@ -36,7 +36,7 @@ class MAE(nn.Module):
             nn.Linear(self.mae.config.hidden_size, len(possible_labels)),
         )
 
-    def forward(self, inputs: torch.Tensor) -> torch.Tensor:
+    def forward(self, inputs: torch.Tensor, *args) -> torch.Tensor:
         outputs = self.mae.forward(inputs)
         return self.classifier(
             outputs.logits[:, 0, :]  # reshape to (batch_size, hidden_size)

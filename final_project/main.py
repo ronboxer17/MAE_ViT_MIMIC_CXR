@@ -1,4 +1,4 @@
-from final_project.datasets.mimic import build_dataset
+from final_project.datasets.mimic import build_mimic_dataset
 from final_project.datasets.parking import train_test_mock_data
 from final_project.trainers.datamodels import TrainingConfig
 from final_project.trainers.trainer import ModelTrainer
@@ -11,13 +11,13 @@ import torch
 
 # define parameters
 lr = 1e-6
-num_epochs = 3
+num_epochs = 1
 batch_size = 32
 device = "cuda"
 
 
-train_dataset = build_dataset(is_train=True)
-val_dataset = build_dataset(is_train=False)
+train_dataset = build_mimic_dataset(is_train=True)
+val_dataset = build_mimic_dataset(is_train=False)
 
 
 

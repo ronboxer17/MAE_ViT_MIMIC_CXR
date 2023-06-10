@@ -1,15 +1,18 @@
 from typing import Optional, Tuple, Any
 import os
+import json
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import datasets
 import logging
 import datetime
 from final_project.trainers.datamodels import TrainingConfig, EpochResult
-from final_project.config import LOGS_PATH, MODELS_PATH
+from final_project.config import LOGS_PATH, MODELS_PATH, METRICS_PATH, DATASET_TYPES
 from tqdm import tqdm
+
 
 
 class ModelTrainer:
@@ -47,7 +50,7 @@ class ModelTrainer:
         self.test_dataloader = self.create_dataloaders(_config.test_dataset)
 
     def create_dataloaders(
-            self, data: datasets.ImageFolder, shuffle: bool = False
+            self, data: Dataset, shuffle: bool = False
     ) -> Optional[DataLoader]:
         # Load the dataset using ImageFolder
         if not data:
@@ -61,7 +64,7 @@ class ModelTrainer:
             f"Start Training model {self.model.model_name} on {self.device},"
             f"{self.num_epochs} epochs, {self.batch_size} batch size"
         )
-        best_loss = 3.0
+        best_loss = np.Inf
         with tqdm(total=self.num_epochs * self.batch_size, desc='Training Progress', position=0) as pbar:
             for nun_epoch in range(self.num_epochs):
                 pbar.set_description(f"Epoch {nun_epoch + 1}/{self.num_epochs}")
@@ -69,14 +72,14 @@ class ModelTrainer:
                 running_loss = 0
 
                 # Training loop
-                for num_batch, (inputs, labels) in enumerate(self.train_dataloader):
-                    batch_loss = self.train_batch(inputs, labels)
+                for num_batch, batch in enumerate(self.train_dataloader):
+                    batch_loss = self.train_batch(*batch)
                     if batch_loss < best_loss:
                         best_loss = batch_loss
-                    pbar.set_description(
-                        f"Epoch: {nun_epoch} Batch {num_batch + 1}/{len(self.train_dataloader)}."
-                        f" batch_loss {batch_loss:.4f}. Best Loss so far {best_loss:.4f}"
-                    )
+                        pbar.set_description(
+                            f"Epoch: {nun_epoch} Batch {num_batch + 1}/{len(self.train_dataloader)}."
+                            f" batch_loss {batch_loss:.4f}. Best Loss so far {best_loss:.4f}"
+                        )
 
                     running_loss += batch_loss
 
@@ -88,7 +91,8 @@ class ModelTrainer:
 
                 self.logger.info(f'Finished Training Epoch {nun_epoch + 1}')
                 # Validation loop
-                self.validate_epoch(nun_epoch + 1, self.num_epochs)
+                self.logger.info(f"Epoch {nun_epoch + 1,}/{self.num_epochs} - Validating")
+                self.validate_epoch(self.val_dataloader, dataset_type='val')
 
                 if self.save_model:
                     self.save_model_to_path()
@@ -96,7 +100,7 @@ class ModelTrainer:
         self.logger.removeHandler(self.file_handler)
         self.file_handler.close()
 
-    def train_batch(self, inputs, labels) -> float:
+    def train_batch(self, inputs, labels, *args) -> float:
         inputs = inputs.to(self.device)
         labels = labels.to(self.device)
 
@@ -116,39 +120,48 @@ class ModelTrainer:
         # print(f"Batch Loss: {loss.item():.4f}")
         return loss.item()
 
-    def validate_epoch(self, current_epoch, total_epochs) -> EpochResult:
-        self.logger.info(f"Epoch {current_epoch}/{total_epochs} - Validating")
+    def validate_epoch(self, data_loader: DataLoader, dataset_type: str) -> EpochResult:
+        assert dataset_type in DATASET_TYPES, f'{dataset_type} Not in {DATASET_TYPES}'
+
+        self.logger.info(f'Starting Evaluating')
         self.model.eval()
-
-        all_losses, all_labels, all_predictions = [], [], []
-
+        all_losses, all_labels, all_predictions, all_ids, all_probabilities = [], [], [], [], []
         with torch.no_grad():
-                                           # TODO: make the function work with val dataloader and train dataloader and test dataloader
-            for epoch, (inputs, labels) in tqdm(enumerate(self.val_dataloader)):
-                inputs = inputs.to(self.device)
-                labels = labels.to(self.device)
-                outputs = self.model(inputs)
-                loss = self.criterion(
-                    outputs, labels
-                )  # Access criterion from instance variable
-                _, predictions = torch.max(outputs.data, 1)
+            with tqdm(total=len(data_loader), desc=f'Evaluation Progress on- {dataset_type}', position=0) as pbar:
+                for epoch, batch in enumerate(data_loader):
+                    inputs = batch[0].to(self.device)
+                    labels = batch[1].to(self.device)
+                    ids = batch[2]
+                    outputs = self.model(inputs)
+                    loss = self.criterion(
+                        outputs, labels
+                    )  # Access criterion from instance variable
+                    probabilities = torch.softmax(outputs.data, axis=1)[:, 1].tolist()
+                    _, predictions = torch.max(outputs.data, 1)
 
-                # save batch results
-                all_losses.append(loss.item())
-                all_labels.extend(labels.tolist())
-                all_predictions.extend(predictions.tolist())
+                    # save batch results
+                    all_losses.append(loss.item())
+                    all_labels.extend(labels.tolist())
+                    all_predictions.extend(predictions.tolist())
+                    all_ids.extend(list(ids))
+                    all_probabilities.extend(probabilities)
+                    pbar.update(1)
 
         epoch_result = EpochResult(
             losses=all_losses,
             labels=all_labels,
             predictions=all_predictions,
+            probabilities=all_probabilities,
+            ids=all_ids,
         )
+        self.save_eval_results(epoch_result, dataset_type)
         self.logger.info(
-            f"Epoch {current_epoch}/{total_epochs} - Last loss: {epoch_result.losses[-1]:.4f}"
-            f"Epoch accuracy: {epoch_result.accuracy:.4f}"
-            f"Epoch precision: {epoch_result.precision:.4f}"
-            f"Epoch recall: {epoch_result.recall:.4f}"
-            f"Epoch f1: {epoch_result.f1:.4f}"
+            f"Epoch Last loss: {epoch_result.losses[-1]:.4f} "
+            f"Epoch accuracy: {epoch_result.accuracy:.4f} "
+            f"Epoch precision: {epoch_result.precision:.4f} "
+            f"Epoch recall: {epoch_result.recall:.4f} "
+            f"Epoch f1: {epoch_result.f1:.4f} "
+            f"Epoch AUC: {epoch_result.roc_auc_score:.4f} "
         )
         return epoch_result
 
@@ -159,6 +172,23 @@ class ModelTrainer:
         model_path = os.path.join(MODELS_PATH, f"{file_name}.pth")
         torch.save(self.model.state_dict(), model_path)
         self.logger.info(f"Model saved to {model_path}")
+
+    def save_eval_results(self, epoch_result: EpochResult, dataset_type: str, file_name: Optional[str] = None) -> None:
+        if not file_name:
+            file_name = self.output_file_name
+
+        file_name = f'{file_name}_{dataset_type}'
+        file_path = os.path.join(METRICS_PATH, f"{file_name}.json")
+        dict = epoch_result.dict()
+        dict.update({
+            'accuracy': epoch_result.accuracy,
+            'precision': epoch_result.precision,
+            'f1': epoch_result.f1,
+            'recall': epoch_result.recall,
+            'roc_auc_score': epoch_result.roc_auc_score,
+        })
+        with open(file_path, "w") as file:
+            json.dump(dict, file)
 
     def init_logger(self) -> Tuple[Any, Any]:
         logger = logging.getLogger("trainer")
