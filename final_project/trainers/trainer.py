@@ -73,6 +73,7 @@ class ModelTrainer:
 
                 # Training loop
                 for num_batch, batch in enumerate(self.train_dataloader):
+                    # TODO: remove this. This is just for debugging
                     if num_batch > 2:
                         break
                     batch_loss = self.train_batch(*batch)
@@ -95,10 +96,10 @@ class ModelTrainer:
                 self.logger.info(
                     f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating"
                 )
-                self.validate_epoch(self.val_dataloader, dataset_type="val")
+        self.validate_epoch(self.val_dataloader, dataset_type="val")
 
-                if self.save_model:
-                    self.save_model_to_path()
+        if self.save_model:
+            self.save_model_to_path()
 
         self.logger.removeHandler(self.file_handler)
         self.file_handler.close()
@@ -138,7 +139,7 @@ class ModelTrainer:
                 for epoch, batch in enumerate(data_loader):
                     inputs = batch[0].to(self.device)
                     labels = batch[1].to(self.device)
-                    ids = batch[2]
+                    ids = batch[2] if len(batch) > 2 else []
 
                     outputs = self.model(inputs)
                     loss = self.criterion(
