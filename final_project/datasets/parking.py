@@ -18,15 +18,17 @@ transformer = transforms.Compose(
 
 
 def load_parking_dataset(
-        root: str = data_root_path, transform=transformer
+        root: str = data_root_path, transform=None
 ) -> datasets.ImageFolder:
+    if transform is None:
+        transform = transformer
     return datasets.ImageFolder(root=root, transform=transform)
 
 
 def train_test_mock_data(
-        train_ratio=0.8,
+        train_ratio=0.8, transformer=None
 ) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:
-    dataset = load_parking_dataset()
+    dataset = load_parking_dataset(transform=transformer)
     train_size = int(train_ratio * len(dataset))
     train_dataset, val_dataset = random_split(
         dataset, [train_size, len(dataset) - train_size]

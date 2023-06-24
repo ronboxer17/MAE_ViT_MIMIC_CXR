@@ -6,6 +6,7 @@ import pandas as pd
 import torch
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
+from transformers import ViTImageProcessor
 
 from final_project.config import (
     DATASET_TYPES,
@@ -38,7 +39,7 @@ class MimicDataset(Dataset):
         image = Image.open(os.path.join(MIMIC_FILES_PATH, path)).convert("RGB")
 
         if self.transform is not None:
-            image = self.transform(image)
+            image = self.transform(image, return_tensors="pt")
         return image, label, id
 
 
@@ -63,7 +64,8 @@ def create_mimic_image_if_possible(id: str, label: str) -> Optional[MimicImage]:
 
 
 def build_mimic_dataset(is_train=True):
-    transform = build_transform(is_train)
+    # transform = build_transform(is_train)
+    transform = ViTImageProcessor.from_pretrained('facebook/vit-mae-base')
     train_ids = create_train_val_test("train" if is_train else "val")
     dataset = MimicDataset(train_ids, transform=transform)
     return dataset

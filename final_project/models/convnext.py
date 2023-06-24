@@ -20,8 +20,8 @@ class ConvNext(nn.Module):
             nn.Linear(768, len(possible_labels)),
         )
 
-    def forward(self, inputs: torch.Tensor, *args) -> torch.Tensor:
-        outputs = self.model.forward(inputs)
+    def forward(self, inputs: torch.Tensor, device='cpu') -> torch.Tensor:
+        outputs = self.model.forward(inputs.to(device))
         return self.classifier(outputs.pooler_output)
 
 

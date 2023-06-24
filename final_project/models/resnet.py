@@ -16,6 +16,6 @@ class ResNet(nn.Module):
             nn.Linear(self.resnet.config.hidden_sizes[-1], len(possible_labels)),
         )
 
-    def forward(self, inputs, *args):
-        outputs = self.resnet.forward(inputs)
+    def forward(self, inputs, device='cpu'):
+        outputs = self.resnet.forward(inputs.to(device))
         return self.classifier(outputs.pooler_output)

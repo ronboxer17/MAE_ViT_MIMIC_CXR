@@ -24,8 +24,10 @@ class MAE(nn.Module):
             nn.Linear(self.mae.config.hidden_size, len(possible_labels)),
         )
 
-    def forward(self, inputs: torch.Tensor, *args) -> torch.Tensor:
-        outputs = self.mae.forward(inputs)
+    def forward(self, inputs, device='cpu') -> torch.Tensor:
+        outputs = self.mae.forward(
+            inputs.get('pixel_values')[0].to(device)
+        )
         return self.classifier(
             outputs.logits[:, 0, :]  # reshape to (batch_size, hidden_size)
         )
@@ -72,15 +74,19 @@ def build_transform(is_train=True, input_size=224):
 
 
 if __name__ == "__main__":
-    mae = MAE(possible_labels=["cat", "dog"])
-    url = "http://images.cocodataset.org/val2017/000000039769.jpg"
-    image = Image.open(requests.get(url, stream=True).raw)
+    # mae = MAE(possible_labels=["cat", "dog"])
+    # url = "http://images.cocodataset.org/val2017/000000039769.jpg"
+    # image = Image.open(requests.get(url, stream=True).raw)
+    #
+    # feature_extractor = AutoFeatureExtractor.from_pretrained("facebook/vit-mae-base")
+    # model = ViTMAEForPreTraining.from_pretrained("facebook/vit-mae-base")
+    #
+    # inputs = feature_extractor(images=[image, image], return_tensors="pt")
+    # outputs = model(**inputs)
+    # loss = outputs.loss
+    # mask = outputs.mask
+    # ids_restore = outputs.ids_restore
 
-    feature_extractor = AutoFeatureExtractor.from_pretrained("facebook/vit-mae-base")
-    model = ViTMAEForPreTraining.from_pretrained("facebook/vit-mae-base")
-
-    inputs = feature_extractor(images=[image, image], return_tensors="pt")
-    outputs = model(**inputs)
-    loss = outputs.loss
-    mask = outputs.mask
-    ids_restore = outputs.ids_restore
+    from transformers import ViTForImageClassification
+    model = ViTForImageClassification.from_pretrained("facebook/vit-mae-base")
+    print(model)

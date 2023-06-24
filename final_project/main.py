@@ -1,4 +1,5 @@
 import torch
+from transformers import ViTImageProcessor
 
 from final_project.datasets.mimic import build_mimic_dataset
 from final_project.datasets.parking import train_test_mock_data
@@ -19,6 +20,9 @@ device = "cpu"
 def train_mae():
     train_dataset = build_mimic_dataset(is_train=True)
     val_dataset = build_mimic_dataset(is_train=False)
+    transform = ViTImageProcessor.from_pretrained('facebook/vit-mae-base')
+
+    train_dataset, val_dataset = train_test_mock_data(transformer=transform)
     model = MAE()
     training_config = TrainingConfig(
         model=model,
@@ -84,4 +88,4 @@ def train_convnext():
 
     trainer.train()
 
-train_convnext()
+train_mae()

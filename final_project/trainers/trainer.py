@@ -76,7 +76,7 @@ class ModelTrainer:
                     # TODO: remove this. This is just for debugging
                     if num_batch > 2:
                         break
-                    batch_loss = self.train_batch(*batch)
+                    batch_loss = self.train_batch(batch)
                     pbar.set_description(
                         f" Epoch {nun_epoch + 1}/{self.num_epochs}"
                         f" Batch {num_batch + 1}/{len(self.train_dataloader)}"
@@ -104,15 +104,16 @@ class ModelTrainer:
         self.logger.removeHandler(self.file_handler)
         self.file_handler.close()
 
-    def train_batch(self, inputs, labels, *args) -> float:
-        inputs = inputs.to(self.device)
-        labels = labels.to(self.device)
+    def train_batch(self, batch) -> float:
+        inputs, labels = batch
+        if len(batch) == 3:
+            ids = batch[2]
 
         # Zero the parameter gradients
         self.optimizer.zero_grad()
 
         # Forward pass
-        outputs = self.model(inputs)
+        outputs = self.model(inputs, device=self.device)
         loss = self.criterion(
             outputs, labels
         )  # Access criterion from instance variable
@@ -137,11 +138,11 @@ class ModelTrainer:
                 position=0,
             ) as pbar:
                 for epoch, batch in enumerate(data_loader):
-                    inputs = batch[0].to(self.device)
-                    labels = batch[1].to(self.device)
+                    inputs = batch[0]
+                    labels = batch[1]
                     ids = batch[2] if len(batch) > 2 else []
 
-                    outputs = self.model(inputs)
+                    outputs = self.model(inputs, device=self.device)
                     loss = self.criterion(
                         outputs, labels
                     )  # Access criterion from instance variable
