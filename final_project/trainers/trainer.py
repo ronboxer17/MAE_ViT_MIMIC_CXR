@@ -63,8 +63,9 @@ class ModelTrainer:
             f"{self.num_epochs} epochs, {self.batch_size} batch size"
         )
         best_loss = np.Inf
+
         with tqdm(
-            total=self.num_epochs * self.batch_size,
+            total=self.num_epochs * len(self.train_dataloader),
             desc="Training Progress",
             position=0,
         ) as pbar:
