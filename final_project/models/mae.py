@@ -14,7 +14,7 @@ class MAE(nn.Module):
     # Todo: change to relevant model
     model_name = "facebook/vit-mae-base"
 
-    def __init__(self, possible_labels: List[str] = ["0", "1"], *args, **kwargs):
+    def __init__(self, possible_labels: List[str] = ["0", "1"], fine_tune_only_classifier=True, *args, **kwargs):
         self.possible_labels = possible_labels
 
         super().__init__(*args, **kwargs)
@@ -23,10 +23,24 @@ class MAE(nn.Module):
         self.classifier = nn.Sequential(
             nn.Linear(self.mae.config.hidden_size, len(possible_labels)),
         )
+        if fine_tune_only_classifier:
+            self._fine_tune_classifier()
+
+
+    def _fine_tune_classifier(self):
+        # this will make only the last encoding layers to be learned
+        # set the other layers to be frozen
+        for name, param in self.mae.named_parameters():
+            param.requires_grad = False
 
     def forward(self, inputs, device='cpu') -> torch.Tensor:
+        shape = inputs.data.get('pixel_values').shape
+        if len(shape) == 5:
+            b, _, p, s1, s2 = shape
+            inputs.data['pixel_values'] = inputs.data['pixel_values'].reshape(b, p, s1, s2)
+
         outputs = self.mae.forward(
-            inputs.get('pixel_values')[0].to(device)
+            inputs.data.get('pixel_values').to(device)
         )
         return self.classifier(
             outputs.logits[:, 0, :]  # reshape to (batch_size, hidden_size)
@@ -74,7 +88,7 @@ def build_transform(is_train=True, input_size=224):
 
 
 if __name__ == "__main__":
-    # mae = MAE(possible_labels=["cat", "dog"])
+
     # url = "http://images.cocodataset.org/val2017/000000039769.jpg"
     # image = Image.open(requests.get(url, stream=True).raw)
     #
@@ -87,6 +101,7 @@ if __name__ == "__main__":
     # mask = outputs.mask
     # ids_restore = outputs.ids_restore
 
-    from transformers import ViTForImageClassification
-    model = ViTForImageClassification.from_pretrained("facebook/vit-mae-base")
-    print(model)
+    mae = MAE()
+    for name, param in mae.named_parameters():
+        print(name, param.requires_grad)
+    # print(model)

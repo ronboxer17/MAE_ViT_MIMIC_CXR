@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
-from transformers import ViTImageProcessor
+from transformers import ViTImageProcessor, AutoImageProcessor
 
 from final_project.config import (
     DATASET_TYPES,
@@ -63,15 +63,28 @@ def create_mimic_image_if_possible(id: str, label: str) -> Optional[MimicImage]:
         return MimicImage(id, int(label))
 
 
-def build_mimic_dataset(is_train=True):
+def build_mimic_dataset(transformer_model: str, is_train=True):
     # transform = build_transform(is_train)
-    transform = ViTImageProcessor.from_pretrained('facebook/vit-mae-base')
+    transform = AutoImageProcessor.from_pretrained(transformer_model)
     train_ids = create_train_val_test("train" if is_train else "val")
     dataset = MimicDataset(train_ids, transform=transform)
     return dataset
 
 
 if __name__ == "__main__":
+    # from transformers import AutoImageProcessor, ViTMAEForPreTraining
+    # from PIL import Image
+    # import requests
+    #
+    # url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
+    # image = Image.open(requests.get(url, stream=True).raw)
+    #
+    # processor = AutoImageProcessor.from_pretrained('facebook/vit-mae-base')
+    # model = ViTMAEForPreTraining.from_pretrained('facebook/vit-mae-base')
+    #
+    # inputs = processor(images=[image, image, image], return_tensors="pt")
+    # outputs = model(**inputs)
+
     data = build_mimic_dataset()
     dataloader = DataLoader(data, batch_size=2)
     for batch in dataloader:

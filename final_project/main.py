@@ -88,4 +88,4 @@ def train_convnext():
 
     trainer.train()
 
-train_mae()
+train_resnet()

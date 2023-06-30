@@ -73,9 +73,9 @@ class ModelTrainer:
 
                 # Training loop
                 for num_batch, batch in enumerate(self.train_dataloader):
-                    # TODO: remove this. This is just for debugging
-                    if num_batch > 2:
-                        break
+                    # # TODO: remove this. This is just for debugging
+                    # if num_batch > 2:
+                    #     break
                     batch_loss = self.train_batch(batch)
                     pbar.set_description(
                         f" Epoch {nun_epoch + 1}/{self.num_epochs}"
@@ -105,9 +105,9 @@ class ModelTrainer:
         self.file_handler.close()
 
     def train_batch(self, batch) -> float:
-        inputs, labels = batch
-        if len(batch) == 3:
-            ids = batch[2]
+        inputs = batch[0]
+        labels = batch[1].to(self.device)
+        ids = batch[2] if len(batch) > 2 else []
 
         # Zero the parameter gradients
         self.optimizer.zero_grad()
@@ -139,7 +139,7 @@ class ModelTrainer:
             ) as pbar:
                 for epoch, batch in enumerate(data_loader):
                     inputs = batch[0]
-                    labels = batch[1]
+                    labels = batch[1].to(self.device)
                     ids = batch[2] if len(batch) > 2 else []
 
                     outputs = self.model(inputs, device=self.device)
