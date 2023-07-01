@@ -19,7 +19,7 @@ device = "cpu"
 def train_mae():
     train_dataset = build_mimic_dataset(is_train=True)
     val_dataset = build_mimic_dataset(is_train=False)
-    transform = ViTImageProcessor.from_pretrained('facebook/vit-mae-base')
+    transform = ViTImageProcessor.from_pretrained("facebook/vit-mae-base")
 
     train_dataset, val_dataset = train_test_mock_data(transformer=transform)
     model = MAE()
@@ -41,6 +41,7 @@ def train_mae():
     )
 
     trainer.train()
+
 
 def train_resnet():
     train_dataset, val_dataset = train_test_mock_data()
@@ -86,5 +87,6 @@ def train_convnext():
     )
 
     trainer.train()
+
 
 train_resnet()

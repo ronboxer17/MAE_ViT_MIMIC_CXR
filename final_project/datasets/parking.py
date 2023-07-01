@@ -9,12 +9,13 @@ from final_project.proj_transformers import DEF_TRANSFORMER
 
 def load_parking_dataset(transformer=None) -> datasets.ImageFolder:
     return datasets.ImageFolder(
-        root=PARKING_DATA_PATH,
-        transform=transformer or DEF_TRANSFORMER
+        root=PARKING_DATA_PATH, transform=transformer or DEF_TRANSFORMER
     )
 
 
-def train_test_mock_data(train_ratio=0.8, transformer=None) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:
+def train_test_mock_data(
+    train_ratio=0.8, transformer=None
+) -> Tuple[datasets.ImageFolder, datasets.ImageFolder]:
     dataset = load_parking_dataset(transformer=transformer)
     train_size = int(train_ratio * len(dataset))
     train_dataset, val_dataset = random_split(

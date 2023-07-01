@@ -24,4 +24,7 @@ def print_label_distribution(json_file_path):
         percentage = (count / total_labels) * 100
         print(f"Label {label}: {count} ({percentage:.2f}%)")
 
-print_label_distribution(r'D:\ron\mimic\final_project\final_project\utils\train_sample_10000.json')
+
+print_label_distribution(
+    r"D:\ron\mimic\final_project\final_project\utils\train_sample_10000.json"
+)

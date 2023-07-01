@@ -7,8 +7,12 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
-from final_project.config import (DATASET_TYPES, IDS_TO_IMAGES_PATHS,
-                                  IDS_WITH_LABELS_AND_SPLITS, MIMIC_FILES_PATH)
+from final_project.config import (
+    DATASET_TYPES,
+    IDS_TO_IMAGES_PATHS,
+    IDS_WITH_LABELS_AND_SPLITS,
+    MIMIC_FILES_PATH,
+)
 from final_project.datasets.datamodels import MimicImgMetaData
 from final_project.proj_transformers import DEF_TRANSFORMER
 
@@ -58,9 +62,8 @@ def create_mimic_image_if_possible(id: str, label: str) -> Optional[MimicImgMeta
         return MimicImgMetaData(id, int(label))
 
 
-def build_mimic_dataset(transformer: Optional[Any] = None, is_train: bool = True) -> MimicDataset:
+def build_mimic_dataset(
+    transformer: Optional[Any] = None, is_train: bool = True
+) -> MimicDataset:
     train_ids = create_train_val_test("train" if is_train else "val")
-    return MimicDataset(
-        train_ids,
-        transform=transformer or DEF_TRANSFORMER
-    )
+    return MimicDataset(train_ids, transform=transformer or DEF_TRANSFORMER)

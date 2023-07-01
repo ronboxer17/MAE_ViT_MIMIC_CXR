@@ -16,7 +16,6 @@ device = "cuda"
 # transformer = AutoImageProcessor.from_pretrained(transformer_model)
 
 
-
 train_dataset = build_mimic_sample(build_mimic_transform(is_train=True), is_train=True)
 val_dataset = build_mimic_sample(build_mimic_transform(is_train=False), is_train=False)
 

@@ -20,8 +20,9 @@ def display_image(image_tensor: torch.Tensor):
 
     # Display the image
     plt.imshow(image_np)
-    plt.axis('off')  # Turn off axis numbers and labels
+    plt.axis("off")  # Turn off axis numbers and labels
     plt.show()
+
 
 # To use the function:
 # display_image(your_image_tensor)

@@ -1,8 +1,14 @@
 from typing import Any, List, Optional
 
 from pydantic import BaseModel
-from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
-                             precision_score, recall_score, roc_auc_score)
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 
 
 class TrainingConfig(BaseModel):
@@ -45,4 +51,3 @@ class EpochResult(BaseModel):
     @property
     def confusion_matrix(self):
         return confusion_matrix(self.labels, self.predictions)
-

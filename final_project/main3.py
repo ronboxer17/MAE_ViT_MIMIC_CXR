@@ -17,8 +17,6 @@ batch_size = 128
 device = "cuda"
 
 
-
-
 # model = MAE()
 model = ResNet()
 

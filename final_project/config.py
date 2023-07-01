@@ -18,8 +18,8 @@ IMG_PATH = os.path.join(r"D:/MIMIC CXR/physionet.org/files/mimic-cxr-jpg/2.0.0/f
 MIMIC_FILES_PATH = r"D:/MIMIC CXR/physionet.org/files/mimic-cxr-jpg/2.0.0/"
 NEW_IMG_PATH = os.path.join(r"D:/ron/MIMIC-MAE/data")
 
-MIMIC_SAMPLE_ROOT = os.path.join(DATA_PATH, 'mimic-cxr', 'mimic_sample')
-PARKING_DATA_PATH = os.path.join(DATA_PATH, 'parking/data')
+MIMIC_SAMPLE_ROOT = os.path.join(DATA_PATH, "mimic-cxr", "mimic_sample")
+PARKING_DATA_PATH = os.path.join(DATA_PATH, "parking/data")
 
 IDS_TO_IMAGES_PATHS = os.path.join(MIMIC_PATH, "meta-data/ids_to_images_paths.json")
 IDS_WITH_LABELS_AND_SPLITS = os.path.join(MIMIC_PATH, "meta-data/dicoms_with_labels_and_splits.csv")

@@ -19,7 +19,7 @@ def process_file(item: Dict[str, str]):
         print(f"Invalid label: {label}. Skipping file: {path}")
         return
 
-    DESTENTION_PATH = r'D:\ron\mimic\final_project\final_project\assets\data\mimic-cxr\mimic_sample\val'
+    DESTENTION_PATH = r"D:\ron\mimic\final_project\final_project\assets\data\mimic-cxr\mimic_sample\val"
 
     filename = os.path.basename(path)
     destination_path = os.path.join(DESTENTION_PATH, destination_folder, filename)
@@ -33,8 +33,7 @@ def save_files_based_on_label(data_list: List[Dict[str, Any]]):
         executor.map(process_file, data_list)
 
 
-
-json_file_path = r'D:\ron\mimic\final_project\final_project\utils\val_sample_2000.json'
+json_file_path = r"D:\ron\mimic\final_project\final_project\utils\val_sample_2000.json"
 
 with open(json_file_path) as file:
     data = json.load(file)

@@ -1,10 +1,10 @@
-from final_project.datasets.mimic import build_mimic_dataset
-from torch.utils.data import DataLoader, Dataset
-from pydantic import BaseModel
-from final_project.config import (
-    IDS_TO_IMAGES_PATHS,
-)
 import json
+
+from pydantic import BaseModel
+from torch.utils.data import DataLoader
+
+from final_project.config import IDS_TO_IMAGES_PATHS
+from final_project.datasets.mimic import build_mimic_dataset
 
 with open(IDS_TO_IMAGES_PATHS, "r") as f:
     ids_to_paths = json.load(f)
@@ -21,8 +21,6 @@ train_dataset = build_mimic_dataset(transformer_model, is_train=True)
 val_dataset = build_mimic_dataset(transformer_model, is_train=False)
 
 
-
-
 sample_size = 2000
 
 sample_images = []
@@ -35,9 +33,9 @@ for i, batch in enumerate(DataLoader(val_dataset, batch_size=1, shuffle=True)):
     sample_images.append(img.dict())
     print(i)
     if i == sample_size:
-        with open(f'val_sample_{sample_size}.json', 'w') as f:
+        with open(f"val_sample_{sample_size}.json", "w") as f:
             json.dump(json.dumps(sample_images), f)
         break
 
-    with open(f'val_sample_{sample_size}.json', 'w') as f:
+    with open(f"val_sample_{sample_size}.json", "w") as f:
         json.dump(json.dumps(sample_images), f)
