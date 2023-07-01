@@ -2,6 +2,6 @@ from dataclasses import dataclass
 
 
 @dataclass
-class MimicImage:
+class MimicImgMetaData:
     id: str
     label: int

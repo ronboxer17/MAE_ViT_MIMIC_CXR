@@ -1,6 +1,6 @@
 import json
 
-import  json
+
 def print_label_distribution(json_file_path):
     with open(json_file_path) as file:
         data = json.load(file)

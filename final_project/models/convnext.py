@@ -1,11 +1,11 @@
-from transformers import AutoModel
 from typing import List
+
 import torch
 from torch import nn
+from transformers import AutoModel
 
 
 class ConvNext(nn.Module):
-    # Todo: change to relevant model
     model_name = "facebook/convnext-base-224"
 
     def __init__(self, possible_labels: List[str] = ["0", "1"], *args, **kwargs):

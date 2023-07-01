@@ -3,16 +3,15 @@ from transformers import ViTImageProcessor
 
 from final_project.datasets.mimic import build_mimic_dataset
 from final_project.datasets.parking import train_test_mock_data
+from final_project.models.convnext import ConvNext
 from final_project.models.mae import MAE
 from final_project.models.resnet import ResNet
-from final_project.models.convnext import ConvNext
-from final_project.trainers.datamodels import TrainingConfig
-from final_project.trainers.trainer import ModelTrainer
-
+from final_project.trainer.datamodels import TrainingConfig
+from final_project.trainer.trainer import ModelTrainer
 
 # define parameters
 lr = 1e-6
-num_epochs = 1
+num_epochs = 2
 batch_size = 32
 device = "cpu"
 

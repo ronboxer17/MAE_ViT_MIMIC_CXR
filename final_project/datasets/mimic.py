@@ -1,28 +1,23 @@
 import json
 import os
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import pandas as pd
 import torch
 from PIL import Image
-from torch.utils.data import DataLoader, Dataset
-from transformers import ViTImageProcessor, AutoImageProcessor
+from torch.utils.data import Dataset
 
-from final_project.config import (
-    DATASET_TYPES,
-    IDS_TO_IMAGES_PATHS,
-    IDS_WITH_LABELS_AND_SPLITS,
-    MIMIC_FILES_PATH,
-)
-from final_project.datasets.datamodels import MimicImage
-from final_project.models.mae import build_transform
+from final_project.config import (DATASET_TYPES, IDS_TO_IMAGES_PATHS,
+                                  IDS_WITH_LABELS_AND_SPLITS, MIMIC_FILES_PATH)
+from final_project.datasets.datamodels import MimicImgMetaData
+from final_project.proj_transformers import DEF_TRANSFORMER
 
 with open(IDS_TO_IMAGES_PATHS, "r") as f:
     IDS_TO_IMAGES = json.load(f)
 
 
 class MimicDataset(Dataset):
-    def __init__(self, ids_labels: List[MimicImage], transform=None):
+    def __init__(self, ids_labels: List[MimicImgMetaData], transform=None):
         with open(IDS_TO_IMAGES_PATHS, "r") as f:
             self.ids_to_images = json.load(f)
         self.ids_labels = ids_labels
@@ -43,7 +38,7 @@ class MimicDataset(Dataset):
         return image, label, id
 
 
-def create_train_val_test(split: str, view: str = "frontal") -> List[MimicImage]:
+def create_train_val_test(split: str, view: str = "frontal") -> List[MimicImgMetaData]:
     assert split in DATASET_TYPES
     if split == "val":  # Special case for MIMIC dataset.
         split = "validate"
@@ -58,35 +53,14 @@ def create_train_val_test(split: str, view: str = "frontal") -> List[MimicImage]
     return df[~df.mimic_images.isna()].mimic_images.tolist()
 
 
-def create_mimic_image_if_possible(id: str, label: str) -> Optional[MimicImage]:
+def create_mimic_image_if_possible(id: str, label: str) -> Optional[MimicImgMetaData]:
     if IDS_TO_IMAGES.get(id):
-        return MimicImage(id, int(label))
+        return MimicImgMetaData(id, int(label))
 
 
-def build_mimic_dataset(transformer_model: str, is_train=True):
-    # transform = build_transform(is_train)
-    transform = AutoImageProcessor.from_pretrained(transformer_model)
+def build_mimic_dataset(transformer: Optional[Any] = None, is_train: bool = True) -> MimicDataset:
     train_ids = create_train_val_test("train" if is_train else "val")
-    dataset = MimicDataset(train_ids, transform=transform)
-    return dataset
-
-
-if __name__ == "__main__":
-    # from transformers import AutoImageProcessor, ViTMAEForPreTraining
-    # from PIL import Image
-    # import requests
-    #
-    # url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
-    # image = Image.open(requests.get(url, stream=True).raw)
-    #
-    # processor = AutoImageProcessor.from_pretrained('facebook/vit-mae-base')
-    # model = ViTMAEForPreTraining.from_pretrained('facebook/vit-mae-base')
-    #
-    # inputs = processor(images=[image, image, image], return_tensors="pt")
-    # outputs = model(**inputs)
-
-    data = build_mimic_dataset()
-    dataloader = DataLoader(data, batch_size=2)
-    for batch in dataloader:
-        print(batch)
-        print()
+    return MimicDataset(
+        train_ids,
+        transform=transformer or DEF_TRANSFORMER
+    )

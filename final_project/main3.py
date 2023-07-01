@@ -4,8 +4,8 @@ from final_project.datasets.mimic import build_mimic_dataset
 from final_project.datasets.parking import train_test_mock_data
 from final_project.models.mae import MAE
 from final_project.models.resnet import ResNet
-from final_project.trainers.datamodels import TrainingConfig
-from final_project.trainers.trainer import ModelTrainer
+from final_project.trainer.datamodels import TrainingConfig
+from final_project.trainer.trainer import ModelTrainer
 
 # train_dataset, val_dataset = train_test_mock_data()
 

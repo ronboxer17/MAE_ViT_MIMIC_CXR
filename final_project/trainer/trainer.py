@@ -9,8 +9,9 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from final_project.config import DATASET_TYPES, LOGS_PATH, METRICS_PATH, MODELS_PATH
-from final_project.trainers.datamodels import EpochResult, TrainingConfig
+from final_project.config import (DATASET_TYPES, LOGS_PATH, METRICS_PATH,
+                                  MODELS_PATH)
+from final_project.trainer.datamodels import EpochResult, TrainingConfig
 
 
 class ModelTrainer:
@@ -44,8 +45,8 @@ class ModelTrainer:
         self.train_dataloader = self.create_dataloaders(
             _config.train_dataset, shuffle=True
         )
-        self.val_dataloader = self.create_dataloaders(_config.val_dataset)
-        self.test_dataloader = self.create_dataloaders(_config.test_dataset)
+        self.val_dataloader = self.create_dataloaders(_config.val_dataset, shuffle=True)
+        self.test_dataloader = self.create_dataloaders(_config.test_dataset, shuffle=True)
 
     def create_dataloaders(
         self, data: Dataset, shuffle: bool = False
@@ -66,8 +67,7 @@ class ModelTrainer:
 
         with tqdm(
             total=self.num_epochs * len(self.train_dataloader),
-            desc="Training Progress",
-            position=0,
+            desc="Training Progress", position=0,
         ) as pbar:
             for nun_epoch in range(self.num_epochs):
                 running_loss = 0
@@ -89,14 +89,12 @@ class ModelTrainer:
                     pbar.update(1)
 
                 epoch_loss = running_loss / len(self.train_dataloader)
-                self.logger.info(
-                    f"Epoch {nun_epoch + 1}/{self.num_epochs} - Batch {num_batch} Training Loss: {epoch_loss:.4f}"
-                )
+                self.logger.info(f"Epoch {nun_epoch + 1}/{self.num_epochs} - Batch {num_batch} Training Loss: {epoch_loss:.4f}")
                 self.logger.info(f"Finished Training Epoch {nun_epoch + 1}")
-                # Validation loop
-                self.logger.info(
-                    f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating"
-                )
+
+        # Validation loop
+        self.logger.info(f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating")
+
         self.validate_epoch(self.val_dataloader, dataset_type="val")
 
         if self.save_model:

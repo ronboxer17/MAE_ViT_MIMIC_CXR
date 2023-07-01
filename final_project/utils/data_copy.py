@@ -1,9 +1,12 @@
+import json
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from final_project.config import MIMIC_FILES_PATH
-import json
+
+
 def process_file(item: Dict[str, str]):
     label = item.get("label")
     path = os.path.join(MIMIC_FILES_PATH, item.get("path"))
