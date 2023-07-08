@@ -1,6 +1,6 @@
 import os.path
 from typing import Any, Optional
-from torch.utils.data import DataLoader
+
 from torchvision import datasets
 from torch.utils.data import Subset
 import torch
@@ -15,6 +15,7 @@ def build_mimic_sample(
 ) -> Subset:
     """
     Load the MIMIC sample dataset.
+    :param sample_size:
     :param transformer: Optional, a valid transformer to apply to the images.
     :param is_train: A boolean indicating whether to load the train or val subset.
     :return: An instance of ImageFolder dataset.
@@ -29,11 +30,6 @@ def build_mimic_sample(
 
     generator = torch.Generator().manual_seed(SEED)
     indices = torch.randperm(len(dataset), generator=generator)
+
     return Subset(dataset, indices[:sample_size].tolist())
-
-
-if __name__ == '__main__':
-    test = build_mimic_sample(is_train=True, sample_size=1000)
-    for batch in DataLoader(test):
-        print(batch[1])
 

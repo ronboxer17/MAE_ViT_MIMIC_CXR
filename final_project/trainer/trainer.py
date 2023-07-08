@@ -61,9 +61,8 @@ class ModelTrainer:
     def train(self):
         self.model.train()
 
-        self.logger.info(
-            f"Start Training model {self.model.model_name} with {self._config.cli_args}")
-        best_loss = np.Inf
+        self.logger.info(f"Start Training model {self.model.model_name} with {self._config.cli_args}")
+
 
         with tqdm(
             total=self.num_epochs * len(self.train_dataloader),
@@ -73,7 +72,7 @@ class ModelTrainer:
             for nun_epoch in range(self.num_epochs):
                 running_loss = 0
 
-                # Training loop
+                best_loss = np.Inf
                 for num_batch, batch in enumerate(self.train_dataloader):
                     # # TODO: remove this. This is just for debugging
                     # if num_batch > 2:
@@ -82,22 +81,20 @@ class ModelTrainer:
                     pbar.set_description(
                         f" Epoch {nun_epoch + 1}/{self.num_epochs}"
                         f" Batch {num_batch + 1}/{len(self.train_dataloader)}"
-                        f" Batch_loss {batch_loss:.4f}. Best Loss so far {best_loss:.4f}"
+                        f" Batch_loss {batch_loss:.4f}. Best batch loss so far {best_loss:.4f}"
                     )
+
                     if batch_loss < best_loss:
                         best_loss = batch_loss
                     running_loss += batch_loss
                     pbar.update(1)
 
-                epoch_loss = running_loss / len(self.train_dataloader)
                 self.logger.info(
-                    f"Epoch {nun_epoch + 1}/{self.num_epochs} - Batch {num_batch} Training Loss: {epoch_loss:.4f}"
+                    f"Finished Training Epoch {nun_epoch + 1}",
+                    f"Loss: {running_loss / len(self.train_dataloader):.4f}"
                 )
-                self.logger.info(f"Finished Training Epoch {nun_epoch + 1}")
 
-        # Validation loop
         self.logger.info(f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating")
-
         self.validate_epoch(self.val_dataloader, dataset_type="val")
 
         if self.save_model:
@@ -202,8 +199,8 @@ class ModelTrainer:
 
         file_name = f"{file_name}_{dataset_type}"
         file_path = os.path.join(METRICS_PATH, f"{file_name}.json")
-        dict = epoch_result.dict()
-        dict.update(
+        result_dict = epoch_result.dict()
+        result_dict.update(
             {
                 "accuracy": epoch_result.accuracy,
                 "precision": epoch_result.precision,
@@ -212,8 +209,22 @@ class ModelTrainer:
                 "roc_auc_score": epoch_result.roc_auc_score,
             }
         )
+        # Load existing results if file exists
+        if os.path.exists(file_path):
+            with open(file_path, "r") as file:
+                results = json.load(file)
+        else:
+            results = {}
+
+        # Get the index for the current iteration
+        iteration_index = len(results)
+
+        # Add the current iteration's results to the dictionary
+        results[iteration_index] = result_dict
+
+        # Save the updated dictionary to the file
         with open(file_path, "w") as file:
-            json.dump(dict, file)
+            json.dump(results, file)
 
     def init_logger(self) -> Tuple[Any, Any]:
         logger = logging.getLogger("trainer")
