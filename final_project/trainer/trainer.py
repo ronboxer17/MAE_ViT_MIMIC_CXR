@@ -69,7 +69,7 @@ class ModelTrainer:
             desc="Training Progress",
             position=0,
         ) as pbar:
-            for nun_epoch in range(self.num_epochs+1):
+            for nun_epoch in range(self.num_epochs):
                 running_loss = 0
 
                 best_loss = np.Inf
