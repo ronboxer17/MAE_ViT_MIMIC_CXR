@@ -34,7 +34,7 @@ class ModelTrainer:
         self.batch_size = batch_size
         self.save_model = save_model
 
-        self.output_metrics_file_name = _create_output_metrics_file_name = ()
+        self.output_metrics_file_name = self._create_output_metrics_file_name()
         self.output_metrics_file_path = self._create_output_metrics_file()
         self.logger, self.file_handler = self.init_logger()
 
@@ -203,13 +203,16 @@ class ModelTrainer:
             }
         )
         with open(self.output_metrics_file_path, "r") as file:
-            results = json.load(file).get("results", {})
+            data = json.load(file)
 
-        iteration_index = len(results)
-        results[str(iteration_index)] = result_dict
+        results = data.get("results", {})
+        iteration_index = len(results) if len(results) > 0 else 0
+        results[iteration_index] = result_dict
+
+        data["results"] = results
 
         with open(self.output_metrics_file_path, "w") as file:
-            json.dump(results, file)
+            json.dump(data, file)
 
     def init_logger(self) -> Tuple[Any, Any]:
         logger = logging.getLogger("trainer")
