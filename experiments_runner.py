@@ -13,13 +13,17 @@ def main(args):
     transformer = AVAILABLE_TRANSFORMS.get(args.transformer)
     transformer_train = transformer.get("train")
     transformer_val = transformer.get("val")
+
+    train_sample_size = args.sample_size
+    val_sample_size = int(train_sample_size * 0.2)
+
     lr = args.lr
     num_epochs = args.epochs
     batch_size = args.batch_size
     device = args.device
 
-    train_dataset = build_mimic_sample(transformer_train, is_train=True)
-    val_dataset = build_mimic_sample(transformer_val, is_train=False)
+    train_dataset = build_mimic_sample(transformer_train, train_sample_size, is_train=True)
+    val_dataset = build_mimic_sample(transformer_val, val_sample_size, is_train=False)
 
     model = MAE()
 
@@ -48,6 +52,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a model with specified parameters")
     parser.add_argument("--lr", type=float, default=1e-6, help="Learning rate")
+    parser.add_argument("--sample_size", type=int, default=10000, help="Sample size for training")
     parser.add_argument("--epochs", type=int, default=2, help="Number of epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
     parser.add_argument("--transformer", type=str, default="default", choices=AVAILABLE_TRANSFORMS.keys(), help="Choose the transformer you want to train")

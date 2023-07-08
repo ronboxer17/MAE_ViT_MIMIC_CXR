@@ -25,3 +25,5 @@ IDS_TO_IMAGES_PATHS = os.path.join(MIMIC_PATH, "meta-data/ids_to_images_paths.js
 IDS_WITH_LABELS_AND_SPLITS = os.path.join(MIMIC_PATH, "meta-data/dicoms_with_labels_and_splits.csv")
 
 DATASET_TYPES = ["train", "val", "test"]
+
+SEED = 17
