@@ -4,7 +4,7 @@ from typing import Any, Optional
 from torchvision import datasets
 
 from final_project.config import MIMIC_SAMPLE_ROOT
-from final_project.proj_transformers import DEF_TRANSFORMER
+from final_project.transformers.proj_transformers import DEF_TRANSFORMER
 
 
 def build_mimic_sample(

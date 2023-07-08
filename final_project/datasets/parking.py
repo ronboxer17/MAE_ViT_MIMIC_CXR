@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader, random_split
 from torchvision import datasets
 
 from final_project.config import PARKING_DATA_PATH
-from final_project.proj_transformers import DEF_TRANSFORMER
+from transformers.proj_transformers import DEF_TRANSFORMER
 
 
 def load_parking_dataset(transformer=None) -> datasets.ImageFolder:
@@ -25,7 +25,6 @@ def train_test_mock_data(
 
 
 if __name__ == "__main__":
-    from final_project.utils.plots import display_image
 
     data, _ = train_test_mock_data()
     dataloader = DataLoader(data, batch_size=1)

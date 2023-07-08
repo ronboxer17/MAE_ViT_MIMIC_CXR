@@ -14,7 +14,7 @@ from final_project.config import (
     MIMIC_FILES_PATH,
 )
 from final_project.datasets.datamodels import MimicImgMetaData
-from final_project.proj_transformers import DEF_TRANSFORMER
+from transformers.proj_transformers import DEF_TRANSFORMER
 
 with open(IDS_TO_IMAGES_PATHS, "r") as f:
     IDS_TO_IMAGES = json.load(f)

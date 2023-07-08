@@ -1,6 +1,7 @@
 from timm.data import create_transform
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from torchvision import transforms
+import PIL
 
 INPUT_SIZE = 224
 
@@ -51,3 +52,11 @@ def build_mimic_transform(is_train=True, input_size=INPUT_SIZE):
     t.append(transforms.ToTensor())
     t.append(transforms.Normalize(mean, std))
     return transforms.Compose(t)
+
+
+
+
+AVAILABLE_TRANSFORMS = {
+    "default": {'train': DEF_TRANSFORMER, 'val': DEF_TRANSFORMER},
+    "mimic": {'train': build_mimic_transform(is_train=True), 'val': build_mimic_transform(is_train=False)},
+}
