@@ -13,6 +13,32 @@ DEF_TRANSFORMER = transformer = transforms.Compose(
     ]
 )
 
+classic_augmentation_transformer = transforms.Compose(
+    [
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(10),
+        transforms.RandomPerspective(distortion_scale=0.2, p=0.5),
+        transforms.RandomGrayscale(p=0.1),
+        transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
+
+new_augmentation_transformer = transforms.Compose(
+    [
+        transforms.RandomHorizontalFlip(),
+        transforms.RandomApply([
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
+            transforms.RandomAffine(degrees=10, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+        ], p=0.5),
+        transforms.RandomErasing(p=0.1, scale=(0.02, 0.33), ratio=(0.3, 3.3)),
+        transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
+
 
 def build_mimic_transform(is_train=True, input_size=INPUT_SIZE):
     mean = IMAGENET_DEFAULT_MEAN
@@ -54,9 +80,21 @@ def build_mimic_transform(is_train=True, input_size=INPUT_SIZE):
     return transforms.Compose(t)
 
 
-
-
 AVAILABLE_TRANSFORMS = {
-    "default": {'train': DEF_TRANSFORMER, 'val': DEF_TRANSFORMER},
-    "mimic": {'train': build_mimic_transform(is_train=True), 'val': build_mimic_transform(is_train=False)},
+    "default": {
+        'train': DEF_TRANSFORMER,
+        'val': DEF_TRANSFORMER
+    },
+    "mimic": {
+        'train': build_mimic_transform(is_train=True),
+        'val': build_mimic_transform(is_train=False)
+    },
+    "classic_augmentation": {
+        'train': classic_augmentation_transformer,
+        'val': DEF_TRANSFORMER
+    },
+    "new_augmentation": {
+        'train': new_augmentation_transformer,
+        'val': DEF_TRANSFORMER
+    },
 }
