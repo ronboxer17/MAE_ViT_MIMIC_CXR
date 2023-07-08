@@ -22,6 +22,7 @@ class ModelTrainer:
         device: str = "cpu",
         save_model: bool = False,
     ):
+        self._config = _config
         # unpack the _config
         self.model = _config.model
         self.criterion = _config.criterion
@@ -61,9 +62,7 @@ class ModelTrainer:
         self.model.train()
 
         self.logger.info(
-            f"Start Training model {self.model.model_name} on {self.device},"
-            f"{self.num_epochs} epochs, {self.batch_size} batch size"
-        )
+            f"Start Training model {self.model.model_name} with {self._config.cli_args}")
         best_loss = np.Inf
 
         with tqdm(

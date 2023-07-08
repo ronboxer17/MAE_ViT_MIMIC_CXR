@@ -15,7 +15,7 @@ def main(args):
     transformer_val = transformer.get("val")
 
     train_sample_size = args.sample_size
-    val_sample_size = int(train_sample_size * 0.2)
+    val_sample_size = min(int(train_sample_size * 0.2), 1830)
 
     lr = args.lr
     num_epochs = args.epochs
@@ -37,6 +37,7 @@ def main(args):
         scheduler=None,
         train_dataset=train_dataset,
         val_dataset=val_dataset,
+        cli_args=vars(args)
     )
 
     trainer = ModelTrainer(

@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 from pydantic import BaseModel
 from sklearn.metrics import (
@@ -19,6 +19,7 @@ class TrainingConfig(BaseModel):
     train_dataset: Optional[Any]
     val_dataset: Optional[Any]
     test_dataset: Optional[Any]
+    cli_args: Dict[str, Any]
 
 
 class EpochResult(BaseModel):
