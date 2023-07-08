@@ -1,6 +1,6 @@
 import os.path
 from typing import Any, Optional
-
+from torch.utils.data import DataLoader
 from torchvision import datasets
 from torch.utils.data import Subset
 import torch
@@ -28,7 +28,12 @@ def build_mimic_sample(
     assert len(dataset) >= sample_size, f"Sample size {sample_size} is larger than dataset size {len(dataset)}"
 
     generator = torch.Generator().manual_seed(SEED)
-    indices = torch.randperm(sample_size, generator=generator)
+    indices = torch.randperm(len(dataset), generator=generator)
+    return Subset(dataset, indices[:sample_size].tolist())
 
-    return Subset(dataset, indices.tolist())
+
+if __name__ == '__main__':
+    test = build_mimic_sample(is_train=True, sample_size=1000)
+    for batch in DataLoader(test):
+        print(batch[1])
 
