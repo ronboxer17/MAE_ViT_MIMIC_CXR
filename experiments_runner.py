@@ -6,11 +6,21 @@ from final_project.models.mae import MAE
 from final_project.transformers.proj_transformers import AVAILABLE_TRANSFORMS
 from final_project.trainer.datamodels import TrainingConfig
 from final_project.trainer.trainer import ModelTrainer
+from final_project.models.datamodels import Models
+from final_project.models.resnet import ResNet
 
 
 def main(args):
     # define parameters
-    transformer = AVAILABLE_TRANSFORMS.get(args.transformer)
+    model_name = args.model
+    if model_name == Models.MAE_BASE.value:
+        model = MAE()
+    elif model_name == Models.RESNET18.value:
+        model = ResNet()
+    else:
+        raise ValueError(f"Model {model_name} is not supported")
+
+    transformer = AVAILABLE_TRANSFORMS.get(args.model).get(args.transformer)
     transformer_train = transformer.get("train")
     transformer_val = transformer.get("val")
 
@@ -22,10 +32,10 @@ def main(args):
     batch_size = args.batch_size
     device = args.device
 
+
     train_dataset = build_mimic_sample(transformer_train, train_sample_size, is_train=True)
     val_dataset = build_mimic_sample(transformer_val, val_sample_size, is_train=False)
 
-    model = MAE()
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
@@ -52,11 +62,13 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a model with specified parameters")
+    parser.add_argument("--model", type=str, default=Models.MAE_BASE.value, choices=[m.value for m in Models], help="Model to train")
     parser.add_argument("--lr", type=float, default=1e-6, help="Learning rate")
     parser.add_argument("--sample_size", type=int, default=10000, help="Sample size for training")
     parser.add_argument("--epochs", type=int, default=2, help="Number of epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
-    parser.add_argument("--transformer", type=str, default="default", choices=AVAILABLE_TRANSFORMS.keys(), help="Choose the transformer you want to train")
+    avb_transforms = [key for model_transforms in AVAILABLE_TRANSFORMS.values() for key in model_transforms.keys()]
+    parser.add_argument("--transformer", type=str, default="mae_with_augmentation_prob_025", choices=avb_transforms, help="Choose the transformer you want to train")
     parser.add_argument("--device", type=str, default="cpu", help="Device to use for training")
 
     args = parser.parse_args()

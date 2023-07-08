@@ -1,9 +1,9 @@
 from torch import nn
 from transformers import ResNetModel
-
+from .datamodels import Models
 
 class ResNet(nn.Module):
-    model_name = "microsoft/resnet-18"
+    model_name = Models.RESNET18.value
 
     def __init__(
         self,
