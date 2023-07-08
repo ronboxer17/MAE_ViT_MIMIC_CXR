@@ -90,12 +90,12 @@ class ModelTrainer:
                     pbar.update(1)
 
                 self.logger.info(
-                    f"Finished Training Epoch {nun_epoch + 1}",
+                    f"Finished Training Epoch {nun_epoch + 1} "
                     f"Loss: {running_loss / len(self.train_dataloader):.4f}"
                 )
 
         self.logger.info(f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating")
-        self.validate_epoch(self.val_dataloader, dataset_type="val")
+        _ = self.validate_epoch(self.val_dataloader, dataset_type="val")
 
         if self.save_model:
             self.save_model_to_path()
@@ -169,7 +169,6 @@ class ModelTrainer:
             probabilities=all_probabilities,
             ids=all_ids,
         )
-        self.save_eval_results(epoch_result, dataset_type)
         self.logger.info(
             f"Epoch Last loss: {epoch_result.losses[-1]:.4f} "
             f"Epoch accuracy: {epoch_result.accuracy:.4f} "
@@ -178,6 +177,9 @@ class ModelTrainer:
             f"Epoch f1: {epoch_result.f1:.4f} "
             f"Epoch AUC: {epoch_result.roc_auc_score:.4f} "
         )
+
+        self.save_eval_results(epoch_result, dataset_type)
+
         return epoch_result
 
     def save_model_to_path(self, file_name: Optional[str] = None):
@@ -220,7 +222,7 @@ class ModelTrainer:
         iteration_index = len(results)
 
         # Add the current iteration's results to the dictionary
-        results[iteration_index] = result_dict
+        results[str(iteration_index)] = result_dict
 
         # Save the updated dictionary to the file
         with open(file_path, "w") as file:
