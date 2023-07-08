@@ -69,7 +69,7 @@ class ModelTrainer:
             desc="Training Progress",
             position=0,
         ) as pbar:
-            for nun_epoch in range(self.num_epochs):
+            for nun_epoch in range(self.num_epochs+1):
                 running_loss = 0
 
                 best_loss = np.Inf
@@ -94,8 +94,8 @@ class ModelTrainer:
                     f"Loss: {running_loss / len(self.train_dataloader):.4f}"
                 )
 
-        self.logger.info(f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating")
-        _ = self.validate_epoch(self.val_dataloader, dataset_type="val")
+                self.logger.info(f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating")
+                _ = self.validate_epoch(self.val_dataloader, dataset_type="val")
 
         if self.save_model:
             self.save_model_to_path()
