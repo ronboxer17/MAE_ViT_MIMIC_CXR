@@ -75,8 +75,8 @@ class ModelTrainer:
                 best_loss = np.Inf
                 for num_batch, batch in enumerate(self.train_dataloader):
                     # # TODO: remove this. This is just for debugging
-                    if num_batch > 2:
-                        break
+                    # if num_batch > 2:
+                    #     break
                     batch_loss = self.train_batch(batch)
                     pbar.set_description(
                         f" Epoch {nun_epoch + 1}/{self.num_epochs}"
