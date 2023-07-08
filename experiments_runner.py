@@ -64,12 +64,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train a model with specified parameters")
     parser.add_argument("--model", type=str, default=Models.MAE_BASE.value, choices=[m.value for m in Models], help="Model to train")
     parser.add_argument("--lr", type=float, default=1e-6, help="Learning rate")
-    parser.add_argument("--sample_size", type=int, default=10000, help="Sample size for training")
+    parser.add_argument("--sample_size", type=int, default=100, help="Sample size for training")
     parser.add_argument("--epochs", type=int, default=2, help="Number of epochs")
     parser.add_argument("--batch_size", type=int, default=32, help="Batch size")
     avb_transforms = [key for model_transforms in AVAILABLE_TRANSFORMS.values() for key in model_transforms.keys()]
     parser.add_argument("--transformer", type=str, default="mae_with_augmentation_prob_025", choices=avb_transforms, help="Choose the transformer you want to train")
-    parser.add_argument("--device", type=str, default="cpu", help="Device to use for training")
+    parser.add_argument("--device", type=str, default="cuda", help="Device to use for training")
 
     args = parser.parse_args()
     main(args)
