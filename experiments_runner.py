@@ -85,3 +85,9 @@ if __name__ == "__main__":
 
 #  4st Experiment -  MAE without Augmentation
 # python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_without_augmentation"
+
+#  5st Experiment -  MAE with Augmentation
+# python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_with_augmentation_prob_050"
+
+#  6st Experiment -  MAE with Augmentation
+# python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_with_augmentation_prob_075"
