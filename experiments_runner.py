@@ -91,3 +91,24 @@ if __name__ == "__main__":
 
 #  6st Experiment -  MAE with Augmentation
 # python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_with_augmentation_prob_075"
+
+
+
+#  7st Experiment -  RESNET 18 with Augmentation
+# python final_project/experiments_runner.py --model "microsoft/resnet-18" --transformer "resnet_with_augmentation" --sample_size 1000
+
+#  8st Experiment -  RESNET 18 without Augmentation
+# python final_project/experiments_runner.py --model "microsoft/resnet-18" --transformer "resnet_without_augmentation" --sample_size 1000
+
+#  9st Experiment -  MAE with Augmentation
+# python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_with_augmentation_prob_025" --sample_size 1000
+
+#  10th Experiment -  MAE without Augmentation
+# python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_without_augmentation" --sample_size 1000
+
+#  11th Experiment -  MAE with Augmentation
+# python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_with_augmentation_prob_050" --sample_size 1000
+
+#  12th Experiment -  MAE with Augmentation
+# python final_project/experiments_runner.py --model "facebook/vit-mae-base" --transformer "mae_with_augmentation_prob_075" --sample_size 1000
+
