@@ -1,13 +1,13 @@
 import argparse
 import torch
 
-from final_project.datasets.mimic_sample import build_mimic_sample
-from final_project.models.mae import MAE
-from final_project.transformers.proj_transformers import AVAILABLE_TRANSFORMS
-from final_project.trainer.datamodels import TrainingConfig
-from final_project.trainer.trainer import ModelTrainer
-from final_project.models.datamodels import Models
-from final_project.models.resnet import ResNet
+from mae_mimic.datasets.mimic_sample import build_mimic_sample
+from mae_mimic.models.mae import MAE
+from mae_mimic.transformers.proj_transformers import AVAILABLE_TRANSFORMS
+from mae_mimic.trainer.datamodels import TrainingConfig
+from mae_mimic.trainer.trainer import ModelTrainer
+from mae_mimic.models.datamodels import Models
+from mae_mimic.models.resnet import ResNet
 
 
 def main(args):

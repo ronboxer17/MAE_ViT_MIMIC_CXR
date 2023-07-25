@@ -7,13 +7,13 @@ import torch
 from PIL import Image
 from torch.utils.data import Dataset
 
-from final_project.config import (
+from mae_mimic.config import (
     DATASET_TYPES,
     IDS_TO_IMAGES_PATHS,
     IDS_WITH_LABELS_AND_SPLITS,
     MIMIC_FILES_PATH,
 )
-from final_project.datasets.datamodels import MimicImgMetaData
+from mae_mimic.datasets.datamodels import MimicImgMetaData
 from transformers.proj_transformers import DEF_TRANSFORMER
 
 with open(IDS_TO_IMAGES_PATHS, "r") as f:

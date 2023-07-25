@@ -4,8 +4,8 @@ from typing import Any, Optional
 from torchvision import datasets
 from torch.utils.data import Subset
 import torch
-from final_project.config import MIMIC_SAMPLE_ROOT, SEED
-from final_project.transformers.proj_transformers import DEF_TRANSFORMER
+from mae_mimic.config import MIMIC_SAMPLE_ROOT, SEED
+from mae_mimic.transformers.proj_transformers import DEF_TRANSFORMER
 
 
 def build_mimic_sample(

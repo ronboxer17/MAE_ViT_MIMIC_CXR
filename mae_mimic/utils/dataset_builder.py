@@ -3,8 +3,8 @@ import json
 from pydantic import BaseModel
 from torch.utils.data import DataLoader
 
-from final_project.config import IDS_TO_IMAGES_PATHS
-from final_project.datasets.mimic import build_mimic_dataset
+from mae_mimic.config import IDS_TO_IMAGES_PATHS
+from mae_mimic.datasets.mimic import build_mimic_dataset
 
 with open(IDS_TO_IMAGES_PATHS, "r") as f:
     ids_to_paths = json.load(f)

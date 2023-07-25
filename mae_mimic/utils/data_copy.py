@@ -4,7 +4,7 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict, List
 
-from final_project.config import MIMIC_FILES_PATH
+from mae_mimic.config import MIMIC_FILES_PATH
 
 
 def process_file(item: Dict[str, str]):

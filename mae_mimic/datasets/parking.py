@@ -3,7 +3,7 @@ from typing import Tuple
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets
 
-from final_project.config import PARKING_DATA_PATH
+from mae_mimic.config import PARKING_DATA_PATH
 from transformers.proj_transformers import DEF_TRANSFORMER
 
 

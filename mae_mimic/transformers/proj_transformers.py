@@ -2,7 +2,7 @@ from timm.data import create_transform
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from torchvision import transforms
 import PIL
-from final_project.models.datamodels import Models
+from mae_mimic.models.datamodels import Models
 
 INPUT_SIZE = 224
 

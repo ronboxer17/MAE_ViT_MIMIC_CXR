@@ -9,8 +9,8 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from final_project.config import DATASET_TYPES, LOGS_PATH, METRICS_PATH, MODELS_PATH
-from final_project.trainer.datamodels import EpochResult, TrainingConfig
+from mae_mimic.config import DATASET_TYPES, LOGS_PATH, METRICS_PATH, MODELS_PATH
+from mae_mimic.trainer.datamodels import EpochResult, TrainingConfig
 
 
 class ModelTrainer:

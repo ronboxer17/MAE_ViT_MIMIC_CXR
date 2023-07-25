@@ -27,3 +27,6 @@ IDS_WITH_LABELS_AND_SPLITS = os.path.join(MIMIC_PATH, "meta-data/dicoms_with_lab
 DATASET_TYPES = ["train", "val", "test"]
 
 SEED = 17
+
+
+print("MIMIC_SAMPLE_ROOT: ", MIMIC_SAMPLE_ROOT)
