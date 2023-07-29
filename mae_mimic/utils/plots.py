@@ -14,10 +14,6 @@ def display_image(image_tensor: torch.Tensor):
     # PyTorch tensors for images have the shape (C, H, W) so we need to transpose it to (H, W, C)
     image_np = np.transpose(image_np, (1, 2, 0))
 
-    # # If the image's pixel values range from 0-255, normalize to 0-1
-    # if np.max(image_np) > 1:
-    #     image_np = image_np / 255
-
     # Display the image
     plt.imshow(image_np)
     plt.axis("off")  # Turn off axis numbers and labels

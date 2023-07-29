@@ -1,3 +1,6 @@
+## This script is used to build a sample of the MIMIC dataset
+
+
 import json
 
 from pydantic import BaseModel

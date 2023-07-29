@@ -21,12 +21,9 @@ NEW_IMG_PATH = os.path.join(r"D:/ron/MIMIC-MAE/data")
 MIMIC_SAMPLE_ROOT = os.path.join(DATA_PATH, "mimic-cxr", "mimic_sample")
 PARKING_DATA_PATH = os.path.join(DATA_PATH, "parking/data")
 
-IDS_TO_IMAGES_PATHS = os.path.join(MIMIC_PATH, "meta-data/ids_to_images_paths.json")
-IDS_WITH_LABELS_AND_SPLITS = os.path.join(MIMIC_PATH, "meta-data/dicoms_with_labels_and_splits.csv")
+IDS_TO_IMAGES_PATHS = os.path.join(MIMIC_PATH, "helpers/ids_to_images_paths.json")
+IDS_WITH_LABELS_AND_SPLITS = os.path.join(MIMIC_PATH, "helpers/dicoms_with_labels_and_splits.csv")
 
 DATASET_TYPES = ["train", "val", "test"]
 
 SEED = 17
-
-
-print("MIMIC_SAMPLE_ROOT: ", MIMIC_SAMPLE_ROOT)
