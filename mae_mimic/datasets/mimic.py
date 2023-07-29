@@ -6,15 +6,11 @@ import pandas as pd
 import torch
 from PIL import Image
 from torch.utils.data import Dataset
-
-from mae_mimic.config import (
-    DATASET_TYPES,
-    IDS_TO_IMAGES_PATHS,
-    IDS_WITH_LABELS_AND_SPLITS,
-    MIMIC_FILES_PATH,
-)
-from mae_mimic.datasets.datamodels import MimicImgMetaData
 from transformers.proj_transformers import DEF_TRANSFORMER
+
+from mae_mimic.config import (DATASET_TYPES, IDS_TO_IMAGES_PATHS,
+                              IDS_WITH_LABELS_AND_SPLITS, MIMIC_FILES_PATH)
+from mae_mimic.datasets.datamodels import MimicImgMetaData
 
 with open(IDS_TO_IMAGES_PATHS, "r") as f:
     IDS_TO_IMAGES = json.load(f)

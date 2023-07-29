@@ -9,18 +9,19 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-from mae_mimic.config import DATASET_TYPES, LOGS_PATH, METRICS_PATH, MODELS_PATH
+from mae_mimic.config import (DATASET_TYPES, LOGS_PATH, METRICS_PATH,
+                              MODELS_PATH)
 from mae_mimic.trainer.datamodels import EpochResult, TrainingConfig
 
 
 class ModelTrainer:
     def __init__(
-            self,
-            _config: TrainingConfig,
-            batch_size: int = 16,
-            num_epochs: int = 10,
-            device: str = "cpu",
-            save_model: bool = False,
+        self,
+        _config: TrainingConfig,
+        batch_size: int = 16,
+        num_epochs: int = 10,
+        device: str = "cpu",
+        save_model: bool = False,
     ):
         self._config = _config
         # unpack the _config
@@ -52,7 +53,7 @@ class ModelTrainer:
         )
 
     def create_dataloaders(
-            self, data: Dataset, shuffle: bool = False
+        self, data: Dataset, shuffle: bool = False
     ) -> Optional[DataLoader]:
         # Load the dataset using ImageFolder
         if not data:
@@ -62,12 +63,14 @@ class ModelTrainer:
     def train(self):
         self.model.train()
 
-        self.logger.info(f"Start Training model {self.model.model_name} with {self._config.cli_args}")
+        self.logger.info(
+            f"Start Training model {self.model.model_name} with {self._config.cli_args}"
+        )
 
         with tqdm(
-                total=self.num_epochs * len(self.train_dataloader),
-                desc="Training Progress",
-                position=0,
+            total=self.num_epochs * len(self.train_dataloader),
+            desc="Training Progress",
+            position=0,
         ) as pbar:
             for nun_epoch in range(self.num_epochs):
                 running_loss = 0
@@ -94,7 +97,9 @@ class ModelTrainer:
                     f"Loss: {running_loss / len(self.train_dataloader):.4f}"
                 )
 
-                self.logger.info(f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating")
+                self.logger.info(
+                    f"Epoch {nun_epoch + 1}/{self.num_epochs} - Validating"
+                )
                 _ = self.validate_epoch(self.val_dataloader, dataset_type="val")
 
         if self.save_model:
@@ -138,9 +143,9 @@ class ModelTrainer:
         )
         with torch.no_grad():
             with tqdm(
-                    total=len(data_loader),
-                    desc=f"Evaluation Progress on- {dataset_type}",
-                    position=0,
+                total=len(data_loader),
+                desc=f"Evaluation Progress on- {dataset_type}",
+                position=0,
             ) as pbar:
                 for epoch, batch in enumerate(data_loader):
                     inputs = batch[0]
@@ -191,7 +196,6 @@ class ModelTrainer:
         self.logger.info(f"Model saved to {model_path}")
 
     def save_eval_results(self, epoch_result: EpochResult) -> None:
-
         result_dict = epoch_result.dict()
         result_dict.update(
             {
@@ -243,8 +247,5 @@ class ModelTrainer:
         file_path = os.path.join(METRICS_PATH, f"{file_name}.json")
 
         with open(file_path, "w") as file:
-            json.dump(
-                {'metadata': self._config.cli_args, 'results': {}},
-                file
-            )
+            json.dump({"metadata": self._config.cli_args, "results": {}}, file)
         return file_path

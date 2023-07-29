@@ -3,7 +3,9 @@ from typing import List
 import torch
 from torch import nn
 from transformers import ViTMAEForPreTraining
+
 from .datamodels import Models
+
 
 class MAE(nn.Module):
     model_name = Models.MAE_BASE.value

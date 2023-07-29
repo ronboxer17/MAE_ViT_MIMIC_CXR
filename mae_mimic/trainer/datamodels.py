@@ -1,14 +1,8 @@
-from typing import Any, List, Optional, Dict
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
-from sklearn.metrics import (
-    accuracy_score,
-    confusion_matrix,
-    f1_score,
-    precision_score,
-    recall_score,
-    roc_auc_score,
-)
+from sklearn.metrics import (accuracy_score, confusion_matrix, f1_score,
+                             precision_score, recall_score, roc_auc_score)
 
 
 class TrainingConfig(BaseModel):

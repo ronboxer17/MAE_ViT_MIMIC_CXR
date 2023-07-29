@@ -2,9 +2,9 @@ from typing import Tuple
 
 from torch.utils.data import DataLoader, random_split
 from torchvision import datasets
+from transformers.proj_transformers import DEF_TRANSFORMER
 
 from mae_mimic.config import PARKING_DATA_PATH
-from transformers.proj_transformers import DEF_TRANSFORMER
 
 
 def load_parking_dataset(transformer=None) -> datasets.ImageFolder:
@@ -25,7 +25,6 @@ def train_test_mock_data(
 
 
 if __name__ == "__main__":
-
     data, _ = train_test_mock_data()
     dataloader = DataLoader(data, batch_size=1)
     for batch in dataloader:
