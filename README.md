@@ -45,9 +45,11 @@ This dataset is multi-label, multi-class. In this work we create a binary classi
 | ResNet  | not augmented | -       | 0.743    | 0.759     | 0.788 | 0.819  | 0.780 |
 
 ## Configurations
+
 1. Get the mimic dataset and set `MIMIC_FILES_PATH` to the root folder of the dataset, in the `config.py` file.
 
 ## How to run?
+
 1. Create python environment. We used poetry, but you can use any other tool. There is also `requirements.txt` file in the root folder.
 2. Activate the environment and run 
 ```bash
