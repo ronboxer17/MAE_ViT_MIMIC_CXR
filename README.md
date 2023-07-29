@@ -11,7 +11,7 @@ This repository contains the code implementation.
 - [MIMIC Dataset](#mimic-dataset)
 - [Results](#results)
 - [Configurations](#configurations)
-- [How to run](#Howtorun)
+- [How to run](#How-to-run)
 
 ## MAE ViT
 <br>
