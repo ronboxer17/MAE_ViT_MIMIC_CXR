@@ -37,10 +37,10 @@ This dataset is multi-label, multi-class. In this work, we create a binary class
 ### Sample size 10,000:
 | Model   | augmentation  | % Masking | Accuracy | Precision | F1    | Recall | AUC   |
 |---------|---------------|-----------|----------|-----------|-------|--------|-------|
-| MAE ViT | augmented     | 0.25      | 0.749    | 0.738     | 0.803 | **0.882**  | 0.809 |
+| MAE ViT | augmented     | 0.25      | 0.749    | 0.738     | 0.803 | <u>**0.882**<\u>   | 0.809 |
 | MAE ViT | augmented     | 0.50      | 0.747    | 0.729     | 0.805 | 0.899  | 0.796 |
-| MAE ViT | augmented     | 0.75      | **0.750**    | **0.737**     |**0.805** | 0.888  | 0.799 |
-| MAE ViT | not augmented | -       | 0.755    | 0.775     | 0.795 | 0.817  | **0.802** |
+| MAE ViT | augmented     | 0.75      | <u>**0.750**<\u>    | <u>**0.737**<\u>      |<u>**0.805**<\u>  | 0.888  | 0.799 |
+| MAE ViT | not augmented | -       | 0.755    | 0.775     | 0.795 | 0.817  | <u>**0.802**<\u>  |
 | ResNet  | augmented     | -         | 0.750    | 0.755     | 0.797 | 0.844  | 0.807 |
 | ResNet  | not augmented | -       | 0.743    | 0.759     | 0.788 | 0.819  | 0.780 |
 
