@@ -45,7 +45,7 @@ This dataset is multi-label, multi-class. In this work, we create a binary class
 | ResNet  | not augmented | -       | 0.743    | 0.759     | 0.788 | 0.819  | 0.780 |
 
 ## Configurations
-1. Get the mimic dataset and set `MIMIC_FILES_PATH` to the root folder of the dataset, in the `config.py` file.
+1. [Get the mimic dataset](https://physionet.org/content/mimic-cxr-jpg/2.0.0/) and set `MIMIC_FILES_PATH` to the root folder of the dataset, in the `config.py` file.
 
 ## How to run
 1. Create a Python environment. We used poetry, but you can use any other tool. There is also a `requirements.txt` file in the root folder.
