@@ -34,10 +34,5 @@ class ResNet(nn.Module):
             param.requires_grad = False
 
     def forward(self, inputs, device="cpu"):
-        # shape = inputs.data.get('pixel_values').shape
-        # if len(shape) == 5:
-        #     b, _, p, s1, s2 = shape
-        #     inputs.data['pixel_values'] = inputs.data['pixel_values'].reshape(b, p, s1, s2)
-
         outputs = self.resnet.forward(inputs.to(device))
         return self.classifier(outputs.pooler_output)
