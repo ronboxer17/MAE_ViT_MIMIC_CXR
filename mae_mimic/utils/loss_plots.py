@@ -28,16 +28,16 @@ def calculate_mean_losses(file_path: str):
     return sample_size, transformer_name, epoch_numbers, mean_losses
 
 
-def plot_losses(file_path: str):
+def plot_losses(file_path: str, out_directory: str):
     data_by_sample_size = {}
 
-    # Step 2: Iterate over all JSON files in the directory
+    # Iterate over all JSON files in the directory
     for root, dirs, files in os.walk(file_path):
         for file in files:
             if file.endswith(".json"):
                 file_path = os.path.join(root, file)
 
-                # Step 3: Extract sample_size and categorize the file
+                # Extract sample_size and categorize the file
                 sample_size, transformer_name, epoch_numbers, mean_losses = calculate_mean_losses(file_path)
 
                 if sample_size not in data_by_sample_size:
@@ -45,7 +45,7 @@ def plot_losses(file_path: str):
 
                 data_by_sample_size[sample_size].append((transformer_name, epoch_numbers, mean_losses))
 
-    # Step 5: Create two separate plots for each sample_size
+    #  Create two separate plots for each sample_size
     for sample_size, data_list in data_by_sample_size.items():
         plt.figure()
         for data in data_list:
@@ -61,8 +61,12 @@ def plot_losses(file_path: str):
         if sample_size == 10000:
             plt.xlim(0, 20)  # Set x-axis limit to 0-20 for sample_size=10000
 
-        plt.show()
+        # plt.show()
+        plt.savefig(os.path.join(out_directory, f'mean_loss_{sample_size}.png'))
+        plt.close()
 
 
-directory = r"../assets/metrics"
-plot_losses(directory)
+input_directory = r"../assets/metrics"
+output_directory = "../assets/imgs"
+
+plot_losses(input_directory, output_directory)
