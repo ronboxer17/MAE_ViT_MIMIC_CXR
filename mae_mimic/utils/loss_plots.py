@@ -46,24 +46,26 @@ def plot_losses(file_path: str, out_directory: str):
                 data_by_sample_size[sample_size].append((transformer_name, epoch_numbers, mean_losses))
 
     #  Create two separate plots for each sample_size
-    for sample_size, data_list in data_by_sample_size.items():
-        plt.figure()
-        for data in data_list:
-            transformer_name, epoch_numbers, mean_losses = data
-            plt.plot(epoch_numbers, mean_losses, marker='o', label=transformer_name)
+    for model in ['MAE', 'ResNet']:
+        for sample_size, data_list in data_by_sample_size.items():
+            plt.figure()
+            for data in data_list:
+                transformer_name, epoch_numbers, mean_losses = data
+                if transformer_name.startswith(model.lower()):
+                    plt.plot(epoch_numbers, mean_losses, marker='o', label=transformer_name)
 
-        plt.xlabel('Epoch')
-        plt.ylabel('Mean Loss')
-        plt.title(f'Mean Loss per Epoch (Sample Size: {sample_size})')
-        plt.grid(True)
-        plt.legend()
+            plt.xlabel('Epoch')
+            plt.ylabel('Mean Loss')
+            plt.title(f'{model} Mean Loss per Epoch (Sample Size: {sample_size})')
+            plt.grid(True)
+            plt.legend()
 
-        if sample_size == 10000:
-            plt.xlim(0, 20)  # Set x-axis limit to 0-20 for sample_size=10000
+            if sample_size == 10000:
+                plt.xlim(0, 20)  # Set x-axis limit to 0-20 for sample_size=10000
 
-        # plt.show()
-        plt.savefig(os.path.join(out_directory, f'mean_loss_{sample_size}.png'))
-        plt.close()
+            # plt.show()
+            plt.savefig(os.path.join(out_directory, f'{model}_mean_loss_{sample_size}.png'))
+            plt.close()
 
 
 input_directory = r"../assets/metrics"

@@ -1,7 +1,7 @@
 # add data folders
-assets/data/parking/*
-assets/data/logs/*
-assets/data/models/*
+/mae_mimic/assets/data/parking/*
+/mae_mimic/assets/data/logs/*
+/mae_mimic/assets/data/models/*
 
 # Pycharm project configuration
 .idea
